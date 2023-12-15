@@ -1,6 +1,7 @@
-glimmer-libui-cc-graphs_and_charts===================
+# Graphs and Charts
+## [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui) Custom Controls
 
-Description goes here.
+Graphs and Charts (Custom Controls) for [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui)
 
 Contributing to glimmer-libui-cc-graphs_and_charts
 ------------------------------------------
@@ -22,5 +23,7 @@ Contributing to glimmer-libui-cc-graphs_and_charts
 Copyright
 ---------
 
+[MIT](LICENSE.txt)
+
 Copyright (c) 2023 Andy Maleh. See
-LICENSE.txt for further details.
+[LICENSE.txt](LICENSE.txt) for further details.
