@@ -154,6 +154,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
+  arm64-darwin-22
 
 DEPENDENCIES
   glimmer-dsl-libui (~> 0.11)
