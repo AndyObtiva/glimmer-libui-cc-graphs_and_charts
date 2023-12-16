@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.2
+
+- Fix issue with crashing if the mouse hovers over a graph without any points yet
+
 ## 0.1.1
 
 - Ensure that `line_graph` max `y_value` is taken into account in visible points only (excluding points outside the visible area)

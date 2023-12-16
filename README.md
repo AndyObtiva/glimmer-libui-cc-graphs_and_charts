@@ -1,18 +1,18 @@
-# Graphs and Charts 0.1.1
+# Graphs and Charts 0.1.2 (Alpha)
 ## [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui) Custom Controls
 [![Gem Version](https://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts.svg)](http://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts)
 [![Join the chat at https://gitter.im/AndyObtiva/glimmer](https://badges.gitter.im/AndyObtiva/glimmer.svg)](https://gitter.im/AndyObtiva/glimmer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Graphs and Charts (Custom Controls) for [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui)
 
-![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-line-graph.png)
+![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
 
 ## Setup
 
 Add this line to Bundler `Gemfile`:
 
 ```ruby
-gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.1'
+gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.2'
 ```
 
 Run:
@@ -69,7 +69,7 @@ line_graph(
 )
 ```
 
-![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-line-graph.png)
+![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
 
 Basic Line Graph Example:
 
@@ -119,7 +119,7 @@ end
 BasicLineGraph.launch
 ```
 
-![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-line-graph.png)
+![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
 
 Contributing to glimmer-libui-cc-graphs_and_charts
 ------------------------------------------

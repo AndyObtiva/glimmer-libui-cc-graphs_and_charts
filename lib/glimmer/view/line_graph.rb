@@ -314,7 +314,7 @@ module Glimmer
       end
       
       def hover_stats
-        return unless display_attributes_on_hover
+        return unless display_attributes_on_hover && @closest_point_index
         
         require "bigdecimal"
         require "perfect_shape/point"
