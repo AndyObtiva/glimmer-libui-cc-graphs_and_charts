@@ -23,9 +23,17 @@ bundle
 
 ## Usage
 
+It is preferred that you only load the graphs/charts that you need to use as per the instructions in the sub-sections below to conserve memory and startup time.
+
+However, if you prefer to load all graphs and charts, add this line to your Ruby file:
+
+```ruby
+require 'glimmer-libui-cc-graphs_and_charts'
+```
+
 ### Line Graph
 
-Add this line to your Ruby file:
+To load the `line_graph` custom control, add this line to your Ruby file:
 
 ```ruby
 require 'glimmer/view/line_graph'

@@ -1,3 +1,5 @@
+require 'glimmer-dsl-libui'
+
 module Glimmer
   module View
     # General-Purpose Line Graph Custom Control
