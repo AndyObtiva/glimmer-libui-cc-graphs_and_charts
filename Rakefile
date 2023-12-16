@@ -22,7 +22,7 @@ Juwelier::Tasks.new do |gem|
   gem.email = "andy.am@gmail.com"
   gem.authors = ["Andy Maleh"]
 
-  gem.files = Dir['VERSION', 'LICENSE.txt', 'lib/**/*']
+  gem.files = Dir['VERSION', 'LICENSE.txt', 'README.md', 'CHANGELOG.md', 'glimmer-libui-cc-graphs_and_charts.gemspec', 'lib/**/*']
   # dependencies defined in Gemfile
 end
 Juwelier::RubygemsDotOrgTasks.new

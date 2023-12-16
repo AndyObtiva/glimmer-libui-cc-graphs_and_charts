@@ -238,8 +238,9 @@ module Glimmer
       
       def y_value_max_for_all_lines
         if @y_value_max_for_all_lines.nil?
-          all_y_values = lines.map { |line| line[:y_values] }.reduce(:+)
-          @y_value_max_for_all_lines = all_y_values.max.to_f
+          line_visible_y_values = lines.map { |line| line[:y_values][0, max_visible_point_count(line)] }
+          all_visible_y_values = line_visible_y_values.reduce(:+)
+          @y_value_max_for_all_lines = all_visible_y_values.max.to_f
         end
         @y_value_max_for_all_lines
       end

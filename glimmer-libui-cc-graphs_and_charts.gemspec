@@ -15,12 +15,16 @@ Gem::Specification.new do |s|
   s.description = "Graphs And Charts - Glimmer DSL for LibUI Custom Controls".freeze
   s.email = "andy.am@gmail.com".freeze
   s.extra_rdoc_files = [
+    "CHANGELOG.md",
     "LICENSE.txt",
     "README.md"
   ]
   s.files = [
+    "CHANGELOG.md",
     "LICENSE.txt",
+    "README.md",
     "VERSION",
+    "glimmer-libui-cc-graphs_and_charts.gemspec",
     "lib/glimmer-libui-cc-graphs_and_charts.rb",
     "lib/glimmer/view/line_graph.rb"
   ]
