@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib".freeze]
   s.authors = ["Andy Maleh".freeze]
   s.date = "2023-12-16"
-  s.description = "Graphs And Charts - Glimmer DSL for LibUI Custom Controls".freeze
+  s.description = "Graphs and Charts (Custom Controls) for Glimmer DSL for LibUI, like Line Graph.".freeze
   s.email = "andy.am@gmail.com".freeze
   s.extra_rdoc_files = [
     "CHANGELOG.md",
@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "LICENSE.txt",
     "README.md",
     "VERSION",
+    "examples/graphs_and_charts/basic_line_graph.rb",
     "glimmer-libui-cc-graphs_and_charts.gemspec",
     "lib/glimmer-libui-cc-graphs_and_charts.rb",
     "lib/glimmer/view/line_graph.rb"
@@ -31,7 +32,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/AndyObtiva/glimmer-libui-cc-graphs_and_charts".freeze
   s.licenses = ["MIT".freeze]
   s.rubygems_version = "3.4.6".freeze
-  s.summary = "Graphs And Charts - Glimmer DSL for LibUI Custom Controls".freeze
+  s.summary = "Graphs and Charts - Glimmer DSL for LibUI Custom Controls".freeze
 
   s.specification_version = 4
 

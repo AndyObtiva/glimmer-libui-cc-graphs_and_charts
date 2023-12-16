@@ -17,12 +17,12 @@ Juwelier::Tasks.new do |gem|
   gem.name = "glimmer-libui-cc-graphs_and_charts"
   gem.homepage = "http://github.com/AndyObtiva/glimmer-libui-cc-graphs_and_charts"
   gem.license = "MIT"
-  gem.summary = %Q{Graphs And Charts - Glimmer DSL for LibUI Custom Controls}
-  gem.description = %Q{Graphs And Charts - Glimmer DSL for LibUI Custom Controls}
+  gem.summary = %Q{Graphs and Charts - Glimmer DSL for LibUI Custom Controls}
+  gem.description = %Q{Graphs and Charts (Custom Controls) for Glimmer DSL for LibUI, like Line Graph.}
   gem.email = "andy.am@gmail.com"
   gem.authors = ["Andy Maleh"]
 
-  gem.files = Dir['VERSION', 'LICENSE.txt', 'README.md', 'CHANGELOG.md', 'glimmer-libui-cc-graphs_and_charts.gemspec', 'lib/**/*']
+  gem.files = Dir['VERSION', 'LICENSE.txt', 'README.md', 'CHANGELOG.md', 'glimmer-libui-cc-graphs_and_charts.gemspec', 'lib/**/*', 'examples/**/*']
   # dependencies defined in Gemfile
 end
 Juwelier::RubygemsDotOrgTasks.new
