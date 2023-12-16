@@ -4,6 +4,7 @@
 
 - Ensure that `line_graph` max `y_value` is taken into account in visible points only (excluding points outside the visible area)
 - Support ability to load entire library instead of individual graphs/charts if preferred
+- New `examples/graphs_and_charts/basic_line_graph.rb`
 
 ## 0.1.0
 

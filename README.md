@@ -1,4 +1,4 @@
-# Graphs and Charts 0.1.0
+# Graphs and Charts 0.1.1
 ## [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui) Custom Controls
 [![Gem Version](https://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts.svg)](http://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts)
 [![Join the chat at https://gitter.im/AndyObtiva/glimmer](https://badges.gitter.im/AndyObtiva/glimmer.svg)](https://gitter.im/AndyObtiva/glimmer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -12,7 +12,7 @@ Graphs and Charts (Custom Controls) for [Glimmer DSL for LibUI](https://github.c
 Add this line to Bundler `Gemfile`:
 
 ```ruby
-gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.0'
+gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.1'
 ```
 
 Run:
@@ -39,35 +39,87 @@ To load the `line_graph` custom control, add this line to your Ruby file:
 require 'glimmer/view/line_graph'
 ```
 
-Example Glimmer GUI DSL code that can be nested under `window` or some container like `vertical_box`:
+This makes the `line_graph` [Glimmer DSL for LibUI Custom Control](https://github.com/AndyObtiva/glimmer-dsl-libui#custom-components) available in the Glimmer GUI DSL.
+You can then nest `line_graph` under `window` or some container like `vertical_box`. By the way, `line_graph` is implemented on top of the [`area` Glimmer DSL for LibUI control](https://github.com/AndyObtiva/glimmer-dsl-libui#area-api).
 
 ```ruby
 line_graph(
   width: 900,
   height: 300,
+  graph_point_distance: :width_divided_by_point_count,
   lines: [
     {
-      name: 'Failed',
+      name: 'Feature A',
       stroke: [163, 40, 39, thickness: 2],
       x_value_start: Time.now,
-      x_interval_in_seconds: 2,
+      x_interval_in_seconds: 8,
       x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
-      y_values: [36, 0, 60, 0, 0, 16, 0, 36, 0, 0]
+      y_values: [80, 36, 10, 60, 20, 110, 16, 5, 36, 1, 77, 15, 3, 34, 8, 63, 12, 17, 90, 28, 70]
     },
     {
-      name: 'Processed',
+      name: 'Feature B',
       stroke: [47, 109, 104, thickness: 2],
       x_value_start: Time.now,
-      x_interval_in_seconds: 2,
+      x_interval_in_seconds: 8,
       x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
-      y_values: [62, 0, 90, 0, 0, 27, 0, 56, 0, 0]
+      y_values: [62, 0, 90, 0, 0, 27, 0, 56, 0, 0, 24, 0, 60, 0, 30, 0, 47, 0, 38, 90, 0]
     },
   ],
   display_attributes_on_hover: true,
 )
 ```
 
-![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-line-graph.png)
+![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-line-graph.png)
+
+Basic Line Graph Example:
+
+[examples/graphs_and_charts/basic_line_graph.rb](/examples/graphs_and_charts/basic_line_graph.rb)
+
+```ruby
+require 'glimmer-dsl-libui'
+require 'glimmer/view/line_graph'
+
+class BasicLineGraph
+  include Glimmer::LibUI::Application
+  
+  before_body do
+    @start_time = Time.now
+  end
+  
+  body {
+    window('Basic Line Graph', 900, 330) {
+      line_graph(
+        width: 900,
+        height: 300,
+        graph_point_distance: :width_divided_by_point_count,
+        lines: [
+          {
+            name: 'Feature A',
+            stroke: [163, 40, 39, thickness: 2],
+            x_value_start: @start_time,
+            x_interval_in_seconds: 8,
+            x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+            y_values: [80, 36, 10, 60, 20, 110, 16, 5, 36, 1, 77, 15, 3, 34, 8, 63, 12, 17, 90, 28, 70]
+          },
+          {
+            name: 'Feature B',
+            stroke: [47, 109, 104, thickness: 2],
+            x_value_start: @start_time,
+            x_interval_in_seconds: 8,
+            x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+            y_values: [62, 0, 90, 0, 0, 27, 0, 56, 0, 0, 24, 0, 60, 0, 30, 0, 47, 0, 38, 90, 0]
+          },
+        ],
+        display_attributes_on_hover: true,
+      )
+    }
+  }
+end
+
+BasicLineGraph.launch
+```
+
+![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-line-graph.png)
 
 Contributing to glimmer-libui-cc-graphs_and_charts
 ------------------------------------------
