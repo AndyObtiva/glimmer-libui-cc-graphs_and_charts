@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.3
+
+- Fix issue with crashing if lines had points that did not share the same x-axis values as opposed to all points in all lines falling on the same x-axis values
+
 ## 0.1.2
 
 - Fix issue with crashing if the mouse hovers over a graph without any points yet

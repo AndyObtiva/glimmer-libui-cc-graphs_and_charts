@@ -331,6 +331,8 @@ module Glimmer
               stroke graph_stroke_hover_line
             }
             closest_points.each_with_index do |closest_point, index|
+              next unless closest_point && closest_point[:x] && closest_point[:y]
+              
               circle(closest_point[:x], closest_point[:y], 4) {
                 fill lines[index][:stroke]
               }
@@ -340,7 +342,12 @@ module Glimmer
             end
             text_label = formatted_x_value(@closest_point_index)
             text_label_width = estimate_width_of_text(text_label, DEFAULT_GRAPH_FONT_MARKER_TEXT)
-            closest_point_texts = lines.map { |line| "#{line[:name]}: #{line[:y_values][@closest_point_index]}" }
+            lines_with_closest_points = lines.each_with_index.map do |line, index|
+              next if closest_points[index].nil?
+              
+              line
+            end
+            closest_point_texts = lines_with_closest_points.map { |line| "#{line[:name]}: #{line[:y_values][@closest_point_index]}" }
             closest_point_text_widths = closest_point_texts.map do |text|
               estimate_width_of_text(text, graph_font_marker_text)
             end
@@ -348,7 +355,7 @@ module Glimmer
             square_to_label_padding = 10.0
             label_padding = 10.0
             text_label_x = width - graph_padding_width - text_label_width - label_padding -
-              (lines.size*(square_size + square_to_label_padding) + (lines.size - 1)*label_padding + closest_point_text_widths.sum)
+              (lines_with_closest_points.size*(square_size + square_to_label_padding) + (lines_with_closest_points.size - 1)*label_padding + closest_point_text_widths.sum)
             text_label_y = height + graph_padding_height
 
             text(text_label_x, text_label_y, text_label_width) {
@@ -359,11 +366,11 @@ module Glimmer
             }
 
             relative_x = text_label_x + text_label_width
-            lines.size.times do |index|
+            lines_with_closest_points.size.times do |index|
               square_x = relative_x + label_padding
 
               square(square_x, text_label_y + 2, square_size) {
-                fill lines[index][:stroke]
+                fill lines_with_closest_points[index][:stroke]
               }
 
               attribute_label_x = square_x + square_size + square_to_label_padding
