@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.4
+
+- Fix issue with crashing at `lib/glimmer/view/line_graph.rb:243:in y_value_max_for_all_lines': undefined method max for nil:NilClass`
+
 ## 0.1.3
 
 - Fix issue with crashing if lines had points that did not share the same x-axis values as opposed to all points in all lines falling on the same x-axis values
