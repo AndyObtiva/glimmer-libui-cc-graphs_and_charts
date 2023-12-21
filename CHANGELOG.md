@@ -4,7 +4,7 @@
 
 - Render circles for every point in addition to the lines connecting all the points
 - Render a single point if there is only 1 value in `lines` `y_values` instead of rendering nothing until 2 values exist at least
-- Support `graph_point_radius`, `graph_selected_point_radius`, and `graph_fill_selected_point` options for custimizing the circle of every rendered point and selected point.
+- Support `graph_point_radius`, `graph_selected_point_radius`, and `graph_fill_selected_point` options for customizing the circle of every rendered point and selected point.
 - Avoid rendering on top of the grid markers on the left side
 - Optimize performance of rendering grid markers and showing mouse hover selection stats of a point
 
