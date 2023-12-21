@@ -4,18 +4,29 @@ module Glimmer
   module View
     # General-Purpose Line Graph Custom Control
     class LineGraph
+      class << self
+        def interpret_color(color_object)
+          @color_cache ||= {}
+          @color_cache[color_object] ||= Glimmer::LibUI.interpret_color(color_object)
+        end
+      end
+    
       include Glimmer::LibUI::CustomControl
       
       DEFAULT_GRAPH_PADDING_WIDTH = 5.0
       DEFAULT_GRAPH_PADDING_HEIGHT = 5.0
-      DEFAULT_GRAPH_GRID_MARKER_PADDING_WIDTH = 30.0
+      DEFAULT_GRAPH_GRID_MARKER_PADDING_WIDTH = 37.0
       DEFAULT_GRAPH_POINT_DISTANCE = 15.0
+      DEFAULT_GRAPH_POINT_RADIUS = 1.0
+      DEFAULT_GRAPH_SELECTED_POINT_RADIUS = 3.0
       
       DEFAULT_GRAPH_STROKE_GRID = [185, 184, 185]
       DEFAULT_GRAPH_STROKE_MARKER = [185, 184, 185]
       DEFAULT_GRAPH_STROKE_MARKER_LINE = [217, 217, 217, thickness: 1, dashes: [1, 1]]
       DEFAULT_GRAPH_STROKE_PERIODIC_LINE = [121, 121, 121, thickness: 1, dashes: [1, 1]]
       DEFAULT_GRAPH_STROKE_HOVER_LINE = [133, 133, 133]
+      
+      DEFAULT_GRAPH_FILL_SELECTED_POINT = :white
       
       DEFAULT_GRAPH_COLOR_MARKER_TEXT = [96, 96, 96]
       DEFAULT_GRAPH_COLOR_PERIOD_TEXT = [163, 40, 39]
@@ -44,12 +55,16 @@ module Glimmer
       option :graph_padding_height, default: DEFAULT_GRAPH_PADDING_HEIGHT
       option :graph_grid_marker_padding_width, default: DEFAULT_GRAPH_GRID_MARKER_PADDING_WIDTH
       option :graph_point_distance, default: DEFAULT_GRAPH_POINT_DISTANCE
+      option :graph_point_radius, default: DEFAULT_GRAPH_POINT_RADIUS
+      option :graph_selected_point_radius, default: DEFAULT_GRAPH_SELECTED_POINT_RADIUS
       
       option :graph_stroke_grid, default: DEFAULT_GRAPH_STROKE_GRID
       option :graph_stroke_marker, default: DEFAULT_GRAPH_STROKE_MARKER
       option :graph_stroke_marker_line, default: DEFAULT_GRAPH_STROKE_MARKER_LINE
       option :graph_stroke_periodic_line, default: DEFAULT_GRAPH_STROKE_PERIODIC_LINE
       option :graph_stroke_hover_line, default: DEFAULT_GRAPH_STROKE_HOVER_LINE
+      
+      option :graph_fill_selected_point, default: DEFAULT_GRAPH_FILL_SELECTED_POINT
       
       option :graph_color_marker_text, default: DEFAULT_GRAPH_COLOR_MARKER_TEXT
       option :graph_color_period_text, default: DEFAULT_GRAPH_COLOR_PERIOD_TEXT
@@ -93,7 +108,7 @@ module Glimmer
         
             if @hover_point && lines && lines[0] && @points && @points[lines[0]] && !@points[lines[0]].empty?
               x = @hover_point[:x]
-              closest_point_index = @points[lines[0]].each_with_index.min_by { |point, index| (point[:x] - x).abs }[1]
+              closest_point_index = ((width - graph_padding_width - x) / graph_point_distance_for_line(lines[0])).round
               if closest_point_index != @closest_point_index
                 @closest_point_index = closest_point_index
                 graph_area.queue_redraw_all
@@ -118,6 +133,11 @@ module Glimmer
         @y_value_max_for_all_lines = nil
         @grid_marker_points = nil
         @points = nil
+        @grid_marker_number_values = nil
+        @grid_marker_numbers = nil
+        @graph_stroke_marker_values = nil
+        @mod_values = nil
+        @estimated_widths_of_text = nil
       end
       
       def calculate_dynamic_options
@@ -127,8 +147,10 @@ module Glimmer
       def calculate_graph_point_distance_per_line
         return unless graph_point_distance == :width_divided_by_point_count
         
-        @graph_point_distance_per_line = lines.inject({}) do |hash, line|
-          hash.merge(line => (width - 2.0*graph_padding_width - graph_grid_marker_padding_width) / (line[:y_values].size - 1).to_f)
+        @graph_point_distance_per_line ||= lines.inject({}) do |hash, line|
+          value = (width - 2.0*graph_padding_width - graph_grid_marker_padding_width) / (line[:y_values].size - 1).to_f
+          value = [value, width - 2.0*graph_padding_width - graph_grid_marker_padding_width].min
+          hash.merge(line => value)
         end
       end
       
@@ -149,12 +171,25 @@ module Glimmer
         line(graph_padding_width, height - graph_padding_height, width - graph_padding_width, height - graph_padding_height) {
           stroke graph_stroke_grid
         }
+        grid_marker_number_font = graph_font_marker_text.merge(size: 11)
+        @grid_marker_number_values ||= []
+        @grid_marker_numbers ||= []
+        @graph_stroke_marker_values ||= []
+        @mod_values ||= []
         grid_marker_points.each_with_index do |marker_point, index|
-          grid_marker_number_value = (grid_marker_points.size - index).to_i
-          grid_marker_number = (grid_marker_number_value >= 1000) ? "#{grid_marker_number_value / 1000}K" : grid_marker_number_value.to_s
-          graph_stroke_marker_value = Glimmer::LibUI.interpret_color(graph_stroke_marker)
-          graph_stroke_marker_value[:thickness] = (index != grid_marker_points.size - 1 ? 2 : 1) if graph_stroke_marker_value[:thickness].nil?
-          mod_value = (2 * ((grid_marker_points.size / max_marker_count) + 1))
+          @grid_marker_number_values[index] ||= (grid_marker_points.size - index).to_i
+          grid_marker_number_value = @grid_marker_number_values[index]
+          @grid_marker_numbers[index] ||= (grid_marker_number_value >= 1000) ? "#{grid_marker_number_value / 1000}K" : grid_marker_number_value.to_s
+          grid_marker_number = @grid_marker_numbers[index]
+          @graph_stroke_marker_values[index] ||= LineGraph.interpret_color(graph_stroke_marker).tap do |color_hash|
+            color_hash[:thickness] = (index != grid_marker_points.size - 1 ? 2 : 1) if color_hash[:thickness].nil?
+          end
+          graph_stroke_marker_value = @graph_stroke_marker_values[index]
+          @mod_values[index] ||= begin
+            mod_value_multiplier = ((grid_marker_points.size / max_marker_count) + 1)
+            [((mod_value_multiplier <= 2 ? 2 : 5) * mod_value_multiplier), 1].max
+          end
+          mod_value = @mod_values[index]
           comparison_value = (mod_value > 2) ? 0 : 1
           if mod_value > 2
             if grid_marker_number_value % mod_value == comparison_value
@@ -173,7 +208,6 @@ module Glimmer
             }
           end
           if grid_marker_number_value % mod_value == comparison_value
-            grid_marker_number_font = graph_font_marker_text.merge(size: 11)
             grid_marker_number_width = estimate_width_of_text(grid_marker_number, grid_marker_number_font)
             text(marker_point[:x] + 4 + 3, marker_point[:y] - 6, grid_marker_number_width) {
               string(grid_marker_number) {
@@ -214,6 +248,11 @@ module Glimmer
           if last_point
             line(last_point[:x], last_point[:y], point[:x], point[:y]) {
               stroke graph_line[:stroke]
+            }
+          end
+          if last_point.nil? || graph_point_radius > 1
+            circle(point[:x], point[:y], graph_point_radius) {
+              fill graph_line[:stroke]
             }
           end
           last_point = point
@@ -257,14 +296,16 @@ module Glimmer
         points
       end
       
-      def max_visible_point_count(graph_line) = (width / graph_point_distance_for_line(graph_line)).to_i + 1
+      def max_visible_point_count(graph_line) = ((width - graph_grid_marker_padding_width) / graph_point_distance_for_line(graph_line)).to_i + 1
 
       def periodic_lines
         return unless lines && lines[0] && lines[0][:x_interval_in_seconds] && lines[0][:x_interval_in_seconds] == DAY_IN_SECONDS
         day_count = lines[0][:y_values].size
         case day_count
         when ..7
-          @points[lines[0]].each do |point|
+          @points[lines[0]].each_with_index do |point, index|
+            next if index == 0
+            
             line(point[:x], graph_padding_height, point[:x], height - graph_padding_height) {
               stroke graph_stroke_periodic_line
             }
@@ -323,68 +364,64 @@ module Glimmer
           x = @hover_point[:x]
           closest_points = lines.map { |line| @points[line][@closest_point_index] }
           closest_x = closest_points[0]&.[](:x)
-          closest_x_distance = PerfectShape::Point.point_distance(x.to_f, 0, closest_x.to_f, 0)
-          # Today, we make the assumption that all lines have points along the same x-axis values
-          # TODO In the future, we can support different x values along different lines
-          if closest_x_distance < graph_point_distance_for_line(lines[0])
-            line(closest_x, graph_padding_height, closest_x, height - graph_padding_height) {
-              stroke graph_stroke_hover_line
+          line(closest_x, graph_padding_height, closest_x, height - graph_padding_height) {
+            stroke graph_stroke_hover_line
+          }
+          closest_points.each_with_index do |closest_point, index|
+            next unless closest_point && closest_point[:x] && closest_point[:y]
+            
+            circle(closest_point[:x], closest_point[:y], graph_selected_point_radius) {
+              fill graph_fill_selected_point == :line_stroke ? lines[index][:stroke] : graph_fill_selected_point
+              stroke_value = lines[index][:stroke].dup
+              stroke_value << {} unless stroke_value.last.is_a?(Hash)
+              stroke_value.last[:thickness] = 2
+              stroke stroke_value
             }
-            closest_points.each_with_index do |closest_point, index|
-              next unless closest_point && closest_point[:x] && closest_point[:y]
-              
-              circle(closest_point[:x], closest_point[:y], 4) {
-                fill lines[index][:stroke]
-              }
-              circle(closest_point[:x], closest_point[:y], 2) {
-                fill :white
-              }
-            end
-            text_label = formatted_x_value(@closest_point_index)
-            text_label_width = estimate_width_of_text(text_label, DEFAULT_GRAPH_FONT_MARKER_TEXT)
-            lines_with_closest_points = lines.each_with_index.map do |line, index|
-              next if closest_points[index].nil?
-              
-              line
-            end
-            closest_point_texts = lines_with_closest_points.map { |line| "#{line[:name]}: #{line[:y_values][@closest_point_index]}" }
-            closest_point_text_widths = closest_point_texts.map do |text|
-              estimate_width_of_text(text, graph_font_marker_text)
-            end
-            square_size = 12.0
-            square_to_label_padding = 10.0
-            label_padding = 10.0
-            text_label_x = width - graph_padding_width - text_label_width - label_padding -
-              (lines_with_closest_points.size*(square_size + square_to_label_padding) + (lines_with_closest_points.size - 1)*label_padding + closest_point_text_widths.sum)
-            text_label_y = height + graph_padding_height
+          end
+          text_label = formatted_x_value(@closest_point_index)
+          text_label_width = estimate_width_of_text(text_label, DEFAULT_GRAPH_FONT_MARKER_TEXT)
+          lines_with_closest_points = lines.each_with_index.map do |line, index|
+            next if closest_points[index].nil?
+            
+            line
+          end.compact
+          closest_point_texts = lines_with_closest_points.map { |line| "#{line[:name]}: #{line[:y_values][@closest_point_index]}" }
+          closest_point_text_widths = closest_point_texts.map do |text|
+            estimate_width_of_text(text, graph_font_marker_text)
+          end
+          square_size = 12.0
+          square_to_label_padding = 10.0
+          label_padding = 10.0
+          text_label_x = width - graph_padding_width - text_label_width - label_padding -
+            (lines_with_closest_points.size*(square_size + square_to_label_padding) + (lines_with_closest_points.size - 1)*label_padding + closest_point_text_widths.sum)
+          text_label_y = height + graph_padding_height
 
-            text(text_label_x, text_label_y, text_label_width) {
-              string(text_label) {
-                font DEFAULT_GRAPH_FONT_MARKER_TEXT
+          text(text_label_x, text_label_y, text_label_width) {
+            string(text_label) {
+              font DEFAULT_GRAPH_FONT_MARKER_TEXT
+              color graph_color_marker_text
+            }
+          }
+
+          relative_x = text_label_x + text_label_width
+          lines_with_closest_points.size.times do |index|
+            square_x = relative_x + label_padding
+
+            square(square_x, text_label_y + 2, square_size) {
+              fill lines_with_closest_points[index][:stroke]
+            }
+
+            attribute_label_x = square_x + square_size + square_to_label_padding
+            attribute_text = closest_point_texts[index]
+            attribute_text_width = closest_point_text_widths[index]
+            relative_x = attribute_label_x + attribute_text_width
+
+            text(attribute_label_x, text_label_y, attribute_text_width) {
+              string(attribute_text) {
+                font graph_font_marker_text
                 color graph_color_marker_text
               }
             }
-
-            relative_x = text_label_x + text_label_width
-            lines_with_closest_points.size.times do |index|
-              square_x = relative_x + label_padding
-
-              square(square_x, text_label_y + 2, square_size) {
-                fill lines_with_closest_points[index][:stroke]
-              }
-
-              attribute_label_x = square_x + square_size + square_to_label_padding
-              attribute_text = closest_point_texts[index]
-              attribute_text_width = closest_point_text_widths[index]
-              relative_x = attribute_label_x + attribute_text_width
-
-              text(attribute_label_x, text_label_y, attribute_text_width) {
-                string(attribute_text) {
-                  font graph_font_marker_text
-                  color graph_color_marker_text
-                }
-              }
-            end
           end
         end
       end
