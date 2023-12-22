@@ -131,6 +131,10 @@ module Glimmer
       def clear_drawing_cache
         @graph_point_distance_per_line = nil
         @y_value_max_for_all_lines = nil
+        @x_resolution = nil
+        @x_value_range_for_all_lines = nil
+        @x_value_min_for_all_lines = nil
+        @x_value_max_for_all_lines = nil
         @grid_marker_points = nil
         @points = nil
         @grid_marker_number_values = nil
@@ -145,13 +149,17 @@ module Glimmer
       end
       
       def calculate_graph_point_distance_per_line
-        return unless graph_point_distance == :width_divided_by_point_count
+        return unless lines[0]&.[](:y_values) && graph_point_distance == :width_divided_by_point_count
         
         @graph_point_distance_per_line ||= lines.inject({}) do |hash, line|
           value = (width - 2.0*graph_padding_width - graph_grid_marker_padding_width) / (line[:y_values].size - 1).to_f
-          value = [value, width - 2.0*graph_padding_width - graph_grid_marker_padding_width].min
+          value = [value, drawable_width].min
           hash.merge(line => value)
         end
+      end
+      
+      def drawable_width
+        width - 2.0*graph_padding_width - graph_grid_marker_padding_width
       end
       
       def graph_point_distance_for_line(line)
@@ -244,7 +252,7 @@ module Glimmer
       def single_line_graph(graph_line)
         last_point = nil
         points = calculate_points(graph_line)
-        points.each do |point|
+        points.to_a.each do |point|
           if last_point
             line(last_point[:x], last_point[:y], point[:x], point[:y]) {
               stroke graph_line[:stroke]
@@ -260,6 +268,14 @@ module Glimmer
       end
       
       def calculate_points(graph_line)
+        if lines[0]&.[](:y_values)
+          calculate_points_relative(graph_line)
+        else
+          calculate_points_absolute(graph_line)
+        end
+      end
+      
+      def calculate_points_relative(graph_line)
         @points ||= {}
         if @points[graph_line].nil?
           y_values = graph_line[:y_values] || []
@@ -275,9 +291,67 @@ module Glimmer
         @points[graph_line]
       end
       
+      def calculate_points_absolute(graph_line)
+        @points ||= {}
+        if @points[graph_line].nil?
+          values = graph_line[:values] || []
+          # all points are visible when :values is supplied because we stretch the graph to show them all
+          graph_y_max = [y_value_max_for_all_lines, 1].max
+          x_value_range_for_all_lines
+          points = values.each_with_index.map do |(x_value, y_value), index|
+            relative_x_value = x_value - x_value_min_for_all_lines
+            stretched_x_value = x_value_range_for_all_lines == 0 ? 0 : relative_x_value.to_f * x_resolution.to_f
+            x = width - graph_padding_width - stretched_x_value
+            y = ((height - graph_padding_height) - y_value * ((height - graph_padding_height * 2) / graph_y_max))
+            {x: x, y: y, index: index, x_value: x_value, y_value: y_value}
+          end
+          # Translation is not supported today
+          # TODO consider supporting in the future
+#           @points[graph_line] = translate_points(graph_line, points)
+          @points[graph_line] = points
+        end
+        @points[graph_line]
+      end
+      
+      # this is the multiplier that we must multiply by the relative_x_value
+      def x_resolution
+        @x_resolution ||= drawable_width.to_f / x_value_range_for_all_lines.to_f
+      end
+      
+      def x_value_range_for_all_lines
+        @x_value_range_for_all_lines ||= x_value_max_for_all_lines - x_value_min_for_all_lines
+      end
+      
+      def x_value_min_for_all_lines
+        if @x_value_min_for_all_lines.nil?
+          line_visible_x_values = lines.map { |line| line[:values].to_h.keys }
+          all_visible_x_values = line_visible_x_values.reduce(:+) || []
+          # Right now, we assume Time objects
+          # TODO support String representations of Time (w/ some auto-detection of format)
+          @x_value_min_for_all_lines = all_visible_x_values.min
+        end
+        @x_value_min_for_all_lines
+      end
+      
+      def x_value_max_for_all_lines
+        if @x_value_max_for_all_lines.nil?
+          line_visible_x_values = lines.map { |line| line[:values].to_h.keys }
+          all_visible_x_values = line_visible_x_values.reduce(:+) || []
+          # Right now, we assume Time objects
+          # TODO support String representations of Time (w/ some auto-detection of format)
+          @x_value_max_for_all_lines = all_visible_x_values.max
+        end
+        @x_value_max_for_all_lines
+      end
+      
       def y_value_max_for_all_lines
         if @y_value_max_for_all_lines.nil?
-          line_visible_y_values = lines.map { |line| line[:y_values][0, max_visible_point_count(line)] }
+          if lines[0]&.[](:y_values)
+            line_visible_y_values = lines.map { |line| line[:y_values][0, max_visible_point_count(line)] }
+          else
+            # When using :values , we always stretch the graph so that all points are visible
+            line_visible_y_values = lines.map { |line| line[:values].to_h.values }
+          end
           all_visible_y_values = line_visible_y_values.reduce(:+) || []
           @y_value_max_for_all_lines = all_visible_y_values.max.to_f
         end

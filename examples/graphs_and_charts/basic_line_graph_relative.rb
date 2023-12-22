@@ -7,42 +7,40 @@ require 'glimmer/view/line_graph'
 class BasicLineGraph
   include Glimmer::LibUI::Application
   
+  before_body do
+    @start_time = Time.now
+  end
+  
   body {
-    window('Basic Line Graph', 900, 300) { |main_window|
+    window('Basic Line Graph', 900, 330) { |main_window|
       @line_graph = line_graph(
         width: 900,
         height: 300,
+        graph_point_distance: :width_divided_by_point_count,
         lines: [
           {
-            name: 'Stock 1',
+            name: 'Feature A',
             stroke: [163, 40, 39, thickness: 2],
-            values: {
-              Time.new(2030, 12, 1) => 80,
-              Time.new(2030, 12, 2) => 36,
-              Time.new(2030, 12, 4) => 10,
-              Time.new(2030, 12, 5) => 60,
-              Time.new(2030, 12, 6) => 20,
-            },
+            x_value_start: @start_time,
+            x_interval_in_seconds: 8,
             x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+            y_values: [80, 36, 10, 60, 20, 110, 16, 5, 36, 1, 77, 15, 3, 34, 8, 63, 12, 17, 90, 28, 70]
           },
           {
-            name: 'Stock 2',
+            name: 'Feature B',
             stroke: [47, 109, 104, thickness: 2],
-            values: {
-              Time.new(2030, 12, 1) => 62,
-              Time.new(2030, 12, 2) => 0,
-              Time.new(2030, 12, 3) => 90,
-              Time.new(2030, 12, 5) => 0,
-              Time.new(2030, 12, 7) => 17,
-            },
+            x_value_start: @start_time,
+            x_interval_in_seconds: 8,
             x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+            y_values: [62, 0, 90, 0, 0, 27, 0, 56, 0, 0, 24, 0, 60, 0, 30, 0, 47, 0, 38, 90, 0]
           },
         ],
+        display_attributes_on_hover: true,
       )
       
       on_content_size_changed do
         @line_graph.width = main_window.content_size[0]
-        @line_graph.height = main_window.content_size[1]
+        @line_graph.height = main_window.content_size[1] - 30
       end
     }
   }

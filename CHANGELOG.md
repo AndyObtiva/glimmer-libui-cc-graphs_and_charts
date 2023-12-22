@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.1.6
+
+- Support passing line `values` as a `Hash` map of x-axis values to y-axis values instead of using the combination of `y_values`, `x_value_start`, and `x_interval_in_seconds`
+- Rename `examples/graphs_and_charts/basic_line_graph.rb` to `examples/graphs_and_charts/basic_line_graph_relative.rb`
+- New `examples/graphs_and_charts/basic_line_graph.rb` (replacing older example that got renamed to `basic_line_graph_relative.rb`)
+- Add graph auto-scaling logic to both `examples/graphs_and_charts/basic_line_graph.rb` & `examples/graphs_and_charts/basic_line_graph_relative.rb`
+
 ## 0.1.5
 
 - Render circles for every point in addition to the lines connecting all the points
