@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.7
+
+- Scale `y` axis when using `values` option to fill up the vertical graph height if all y-axis values are smaller than `1`
+
 ## 0.1.6
 
 - Support passing line `values` as a `Hash` map of x-axis values to y-axis values instead of using the combination of `y_values`, `x_value_start`, and `x_interval_in_seconds`

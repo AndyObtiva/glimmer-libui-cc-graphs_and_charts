@@ -1,18 +1,18 @@
-# Graphs and Charts 0.1.6 (Alpha)
+# Graphs and Charts 0.1.7 (Alpha)
 ## [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui) Custom Controls
 [![Gem Version](https://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts.svg)](http://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts)
 [![Join the chat at https://gitter.im/AndyObtiva/glimmer](https://badges.gitter.im/AndyObtiva/glimmer.svg)](https://gitter.im/AndyObtiva/glimmer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Graphs and Charts (Custom Controls) for [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui)
 
-![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
+![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
 
 ## Setup
 
 Add this line to Bundler `Gemfile`:
 
 ```ruby
-gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.6'
+gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.7'
 ```
 
 Run:
@@ -42,6 +42,53 @@ require 'glimmer/view/line_graph'
 This makes the `line_graph` [Glimmer DSL for LibUI Custom Control](https://github.com/AndyObtiva/glimmer-dsl-libui#custom-components) available in the Glimmer GUI DSL.
 You can then nest `line_graph` under `window` or some container like `vertical_box`. By the way, `line_graph` is implemented on top of the [`area` Glimmer DSL for LibUI control](https://github.com/AndyObtiva/glimmer-dsl-libui#area-api).
 
+Note that you can use in absolute mode or relative mode for determining x-axis values starting from newest point to oldest point along the time x-axis:
+- Absolute Mode: pass `values` which maps x-axis values to y-axis values
+- Relative Mode: pass `y_values`, `x_value_start`, and `x_interval_in_seconds` (x-axis values are calculated automatically in a uniform way from `x_value_start` deducting `x_interval_in_seconds`)
+
+**Absolute Mode:**
+
+It supports any `Numeric` y-axis values in addition to `Time` x-axis values.
+
+```ruby
+      @line_graph = line_graph(
+        width: 900,
+        height: 300,
+        lines: [
+          {
+            name: 'Stock 1',
+            stroke: [163, 40, 39, thickness: 2],
+            values: {
+              Time.new(2030, 12, 1) => 80,
+              Time.new(2030, 12, 2) => 36,
+              Time.new(2030, 12, 4) => 10,
+              Time.new(2030, 12, 5) => 60,
+              Time.new(2030, 12, 6) => 20,
+            },
+            x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+          },
+          {
+            name: 'Stock 2',
+            stroke: [47, 109, 104, thickness: 2],
+            values: {
+              Time.new(2030, 12, 1) => 62,
+              Time.new(2030, 12, 2) => 0,
+              Time.new(2030, 12, 3) => 90,
+              Time.new(2030, 12, 5) => 0,
+              Time.new(2030, 12, 7) => 17,
+            },
+            x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+          },
+        ],
+      )
+```
+
+![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
+
+**Relative Mode:**
+
+Currently, it only supports `Integer` y-axis values in addition to `Time` x-axis values.
+
 ```ruby
 line_graph(
   width: 900,
@@ -69,13 +116,68 @@ line_graph(
 )
 ```
 
-![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
+![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
 
 Look into [lib/glimmer/view/line_graph.rb](/lib/glimmer/view/line_graph.rb) to learn about all supported options.
 
-Basic Line Graph Example:
+**Basic Line Graph Example:**
 
 [examples/graphs_and_charts/basic_line_graph.rb](/examples/graphs_and_charts/basic_line_graph.rb)
+
+```ruby
+require 'glimmer-dsl-libui'
+require 'glimmer/view/line_graph'
+
+class BasicLineGraph
+  include Glimmer::LibUI::Application
+  
+  body {
+    window('Basic Line Graph', 900, 300) { |main_window|
+      @line_graph = line_graph(
+        width: 900,
+        height: 300,
+        lines: [
+          {
+            name: 'Stock 1',
+            stroke: [163, 40, 39, thickness: 2],
+            values: {
+              Time.new(2030, 12, 1) => 80,
+              Time.new(2030, 12, 2) => 36,
+              Time.new(2030, 12, 4) => 10,
+              Time.new(2030, 12, 5) => 60,
+              Time.new(2030, 12, 6) => 20,
+            },
+            x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+          },
+          {
+            name: 'Stock 2',
+            stroke: [47, 109, 104, thickness: 2],
+            values: {
+              Time.new(2030, 12, 1) => 62,
+              Time.new(2030, 12, 2) => 0,
+              Time.new(2030, 12, 3) => 90,
+              Time.new(2030, 12, 5) => 0,
+              Time.new(2030, 12, 7) => 17,
+            },
+            x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+          },
+        ],
+      )
+      
+      on_content_size_changed do
+        @line_graph.width = main_window.content_size[0]
+        @line_graph.height = main_window.content_size[1]
+      end
+    }
+  }
+end
+
+BasicLineGraph.launch
+```
+
+![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
+
+**Basic Line Graph Relative Example:**
 
 ```ruby
 require 'glimmer-dsl-libui'
@@ -121,7 +223,7 @@ end
 BasicLineGraph.launch
 ```
 
-![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
+![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
 
 Contributing to glimmer-libui-cc-graphs_and_charts
 ------------------------------------------

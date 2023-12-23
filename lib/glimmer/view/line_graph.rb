@@ -132,6 +132,7 @@ module Glimmer
         @graph_point_distance_per_line = nil
         @y_value_max_for_all_lines = nil
         @x_resolution = nil
+        @y_resolution = nil
         @x_value_range_for_all_lines = nil
         @x_value_min_for_all_lines = nil
         @x_value_max_for_all_lines = nil
@@ -153,13 +154,17 @@ module Glimmer
         
         @graph_point_distance_per_line ||= lines.inject({}) do |hash, line|
           value = (width - 2.0*graph_padding_width - graph_grid_marker_padding_width) / (line[:y_values].size - 1).to_f
-          value = [value, drawable_width].min
+          value = [value, width_drawable].min
           hash.merge(line => value)
         end
       end
       
-      def drawable_width
+      def width_drawable
         width - 2.0*graph_padding_width - graph_grid_marker_padding_width
+      end
+      
+      def height_drawable
+        height - 2.0*graph_padding_height
       end
       
       def graph_point_distance_for_line(line)
@@ -184,8 +189,15 @@ module Glimmer
         @grid_marker_numbers ||= []
         @graph_stroke_marker_values ||= []
         @mod_values ||= []
+        if lines && lines.all? {|line| line[:values]} && !y_value_max_for_all_lines.nil? && y_value_max_for_all_lines > 1
+          return
+        end
         grid_marker_points.each_with_index do |marker_point, index|
-          @grid_marker_number_values[index] ||= (grid_marker_points.size - index).to_i
+          @grid_marker_number_values[index] ||= begin
+            value = (grid_marker_points.size - index).to_i
+            value = y_value_max_for_all_lines if !y_value_max_for_all_lines.nil? && y_value_max_for_all_lines.to_i != y_value_max_for_all_lines && grid_marker_points.size == 1
+            value
+          end
           grid_marker_number_value = @grid_marker_number_values[index]
           @grid_marker_numbers[index] ||= (grid_marker_number_value >= 1000) ? "#{grid_marker_number_value / 1000}K" : grid_marker_number_value.to_s
           grid_marker_number = @grid_marker_numbers[index]
@@ -215,7 +227,7 @@ module Glimmer
               stroke graph_stroke_marker_line
             }
           end
-          if grid_marker_number_value % mod_value == comparison_value
+          if grid_marker_number_value % mod_value == comparison_value || grid_marker_number_value != grid_marker_number_value.to_i
             grid_marker_number_width = estimate_width_of_text(grid_marker_number, grid_marker_number_font)
             text(marker_point[:x] + 4 + 3, marker_point[:y] - 6, grid_marker_number_width) {
               string(grid_marker_number) {
@@ -229,10 +241,10 @@ module Glimmer
       
       def grid_marker_points
         if @grid_marker_points.nil?
-          graph_max = [y_value_max_for_all_lines, 1].max
+          graph_y_max = [y_value_max_for_all_lines, y_value_max_for_all_lines.between?(0, 1) ? y_value_max_for_all_lines : 1].max
           current_graph_height = (height - graph_padding_height * 2)
-          division_height = current_graph_height / graph_max
-          @grid_marker_points = graph_max.to_i.times.map do |marker_index|
+          division_height = current_graph_height / graph_y_max
+          @grid_marker_points = graph_y_max.ceil.times.map do |marker_index|
             x = graph_padding_width
             y = graph_padding_height + marker_index * division_height
             {x: x, y: y}
@@ -280,10 +292,10 @@ module Glimmer
         if @points[graph_line].nil?
           y_values = graph_line[:y_values] || []
           y_values = y_values[0, max_visible_point_count(graph_line)]
-          graph_max = [y_value_max_for_all_lines, 1].max
+          graph_y_max = [y_value_max_for_all_lines, 1].max
           points = y_values.each_with_index.map do |y_value, index|
             x = width - graph_padding_width - (index * graph_point_distance_for_line(graph_line))
-            y = ((height - graph_padding_height) - y_value * ((height - graph_padding_height * 2) / graph_max))
+            y = ((height - graph_padding_height) - y_value * ((height - graph_padding_height * 2) / graph_y_max))
             {x: x, y: y, index: index, y_value: y_value}
           end
           @points[graph_line] = translate_points(graph_line, points)
@@ -300,9 +312,10 @@ module Glimmer
           x_value_range_for_all_lines
           points = values.each_with_index.map do |(x_value, y_value), index|
             relative_x_value = x_value - x_value_min_for_all_lines
-            stretched_x_value = x_value_range_for_all_lines == 0 ? 0 : relative_x_value.to_f * x_resolution.to_f
-            x = width - graph_padding_width - stretched_x_value
-            y = ((height - graph_padding_height) - y_value * ((height - graph_padding_height * 2) / graph_y_max))
+            scaled_x_value = x_value_range_for_all_lines == 0 ? 0 : relative_x_value.to_f * x_resolution.to_f
+            scaled_y_value = y_value_max_for_all_lines == 0 ? 0 : y_value.to_f * y_resolution.to_f
+            x = width - graph_padding_width - scaled_x_value
+            y = height - graph_padding_height - scaled_y_value
             {x: x, y: y, index: index, x_value: x_value, y_value: y_value}
           end
           # Translation is not supported today
@@ -313,9 +326,15 @@ module Glimmer
         @points[graph_line]
       end
       
-      # this is the multiplier that we must multiply by the relative_x_value
+      # this is the multiplier that we must multiply by the relative x value
       def x_resolution
-        @x_resolution ||= drawable_width.to_f / x_value_range_for_all_lines.to_f
+        @x_resolution ||= width_drawable.to_f / x_value_range_for_all_lines.to_f
+      end
+      
+      # this is the multiplier that we must multiply by the relative y value
+      def y_resolution
+        # TODO in the future, we will use the y range, but today, we assume it starts at 0
+        @y_resolution ||= height_drawable.to_f / y_value_max_for_all_lines.to_f
       end
       
       def x_value_range_for_all_lines
