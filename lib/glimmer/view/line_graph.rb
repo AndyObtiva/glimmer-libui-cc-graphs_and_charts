@@ -189,13 +189,10 @@ module Glimmer
         @grid_marker_numbers ||= []
         @graph_stroke_marker_values ||= []
         @mod_values ||= []
-        if lines && lines.all? {|line| line[:values]} && !y_value_max_for_all_lines.nil? && y_value_max_for_all_lines > 1
-          return
-        end
         grid_marker_points.each_with_index do |marker_point, index|
           @grid_marker_number_values[index] ||= begin
             value = (grid_marker_points.size - index).to_i
-            value = y_value_max_for_all_lines if !y_value_max_for_all_lines.nil? && y_value_max_for_all_lines.to_i != y_value_max_for_all_lines && grid_marker_points.size == 1
+            value = y_value_max_for_all_lines if !y_value_max_for_all_lines.nil? && y_value_max_for_all_lines.to_i != y_value_max_for_all_lines && index == 0
             value
           end
           grid_marker_number_value = @grid_marker_number_values[index]
@@ -241,15 +238,31 @@ module Glimmer
       
       def grid_marker_points
         if @grid_marker_points.nil?
-          graph_y_max = [y_value_max_for_all_lines, y_value_max_for_all_lines.between?(0, 1) ? y_value_max_for_all_lines : 1].max
-          current_graph_height = (height - graph_padding_height * 2)
-          division_height = current_graph_height / graph_y_max
-          @grid_marker_points = graph_y_max.ceil.times.map do |marker_index|
-            x = graph_padding_width
-            y = graph_padding_height + marker_index * division_height
-            {x: x, y: y}
+          if lines[0]&.[](:y_values)
+            graph_y_max = [y_value_max_for_all_lines, 1].max
+            current_graph_height = (height - graph_padding_height * 2)
+            division_height = current_graph_height / graph_y_max
+            @grid_marker_points = graph_y_max.to_i.times.map do |marker_index|
+              x = graph_padding_width
+              y = graph_padding_height + marker_index * division_height
+              {x: x, y: y}
+            end
+          else
+            graph_y_max = y_value_max_for_all_lines
+            y_value_count = graph_y_max.ceil
+            @grid_marker_points = y_value_count.times.map do |marker_index|
+              x = graph_padding_width
+              y_value = y_value_count - marker_index
+              if marker_index == 0 && graph_y_max.ceil != graph_y_max.to_i
+                y_value = graph_y_max
+              end
+              scaled_y_value = y_value.to_f * y_resolution.to_f
+              y = height - graph_padding_height - scaled_y_value
+              {x: x, y: y}
+            end
           end
         end
+
         @grid_marker_points
       end
       

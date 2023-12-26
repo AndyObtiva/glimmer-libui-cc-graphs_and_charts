@@ -1,7 +1,6 @@
 # TODO
 
 - Support non-Integer values for `line_graph` in relative mode
-- Fix showing of grid marker lines with `values` as non-Integer
 - Support showing grid marker lines with non-Integer values (when y-axis values are all less than 1 subdivide by fractions)
 - Rename lines to series (spawning a new minor version)
 - Reverse the order of y_values data (spawning a new minor version)

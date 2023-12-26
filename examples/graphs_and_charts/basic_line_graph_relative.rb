@@ -4,7 +4,7 @@ $LOAD_PATH.prepend(File.expand_path(File.join(__dir__, '..', '..', 'lib'))) if F
 require 'glimmer-dsl-libui'
 require 'glimmer/view/line_graph'
 
-class BasicLineGraph
+class BasicLineGraphRelative
   include Glimmer::LibUI::Application
   
   before_body do
@@ -12,7 +12,7 @@ class BasicLineGraph
   end
   
   body {
-    window('Basic Line Graph', 900, 330) { |main_window|
+    window('Basic Line Graph Relative', 900, 330) { |main_window|
       @line_graph = line_graph(
         width: 900,
         height: 300,
@@ -46,4 +46,4 @@ class BasicLineGraph
   }
 end
 
-BasicLineGraph.launch
+BasicLineGraphRelative.launch

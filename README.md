@@ -1,4 +1,4 @@
-# Graphs and Charts 0.1.7 (Alpha)
+# Graphs and Charts 0.1.8 (Alpha)
 ## [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui) Custom Controls
 [![Gem Version](https://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts.svg)](http://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts)
 [![Join the chat at https://gitter.im/AndyObtiva/glimmer](https://badges.gitter.im/AndyObtiva/glimmer.svg)](https://gitter.im/AndyObtiva/glimmer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -12,7 +12,7 @@ Graphs and Charts (Custom Controls) for [Glimmer DSL for LibUI](https://github.c
 Add this line to Bundler `Gemfile`:
 
 ```ruby
-gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.7'
+gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.8'
 ```
 
 Run:
@@ -183,7 +183,7 @@ BasicLineGraph.launch
 require 'glimmer-dsl-libui'
 require 'glimmer/view/line_graph'
 
-class BasicLineGraph
+class BasicLineGraphRelative
   include Glimmer::LibUI::Application
   
   before_body do
@@ -191,7 +191,7 @@ class BasicLineGraph
   end
   
   body {
-    window('Basic Line Graph', 900, 330) {
+    window('Basic Line Graph Relative', 900, 330) {
       line_graph(
         width: 900,
         height: 300,
@@ -220,7 +220,7 @@ class BasicLineGraph
   }
 end
 
-BasicLineGraph.launch
+BasicLineGraphRelative.launch
 ```
 
 ![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
