@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.1
+
+- Fix clipped text of grid markers when they include 1000 displayed as 1K
+
 ## 0.2.0
 
 - Initial implementation of `bar_chart` custom control
