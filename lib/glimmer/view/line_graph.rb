@@ -142,7 +142,6 @@ module Glimmer
         @grid_marker_numbers = nil
         @graph_stroke_marker_values = nil
         @mod_values = nil
-        @estimated_widths_of_text = nil
       end
       
       def calculate_dynamic_options

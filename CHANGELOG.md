@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.2.0
+
+- Initial implementation of `bar_chart` custom control
+- New `examples/graphs_and_charts/basic_bar_chart.rb`
+
 ## 0.1.8
 
 - Fix the display of grid marker lines when passing `values` with non-Integer y-axis values (especially max y-axis value being non-Integer). It now shows highest grid marker having a non-Integer value while keeping smaller values as Integer (e.g. 1, 2, 3, 3.75).

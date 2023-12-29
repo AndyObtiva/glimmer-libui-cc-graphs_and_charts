@@ -1,9 +1,11 @@
-# Graphs and Charts 0.1.8 (Alpha)
+# Graphs and Charts 0.2.0 (Alpha)
 ## [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui) Custom Controls
 [![Gem Version](https://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts.svg)](http://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts)
 [![Join the chat at https://gitter.im/AndyObtiva/glimmer](https://badges.gitter.im/AndyObtiva/glimmer.svg)](https://gitter.im/AndyObtiva/glimmer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Graphs and Charts (Custom Controls) for [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui)
+
+![bar chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bar-chart.png)
 
 ![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
 
@@ -12,7 +14,7 @@ Graphs and Charts (Custom Controls) for [Glimmer DSL for LibUI](https://github.c
 Add this line to Bundler `Gemfile`:
 
 ```ruby
-gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.1.8'
+gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.2.0'
 ```
 
 Run:
@@ -30,6 +32,89 @@ However, if you prefer to load all graphs and charts, add this line to your Ruby
 ```ruby
 require 'glimmer-libui-cc-graphs_and_charts'
 ```
+
+### Bar Chart
+
+To load the `bar_chart` custom control, add this line to your Ruby file:
+
+```ruby
+require 'glimmer/view/bar_chart'
+```
+
+This makes the `bar_chart` [Glimmer DSL for LibUI Custom Control](https://github.com/AndyObtiva/glimmer-dsl-libui#custom-components) available in the Glimmer GUI DSL.
+You can then nest `bar_chart` under `window` or some container like `vertical_box`. By the way, `bar_chart` is implemented on top of the [`area` Glimmer DSL for LibUI control](https://github.com/AndyObtiva/glimmer-dsl-libui#area-api).
+
+`values` are a `Hash` map of `String` x-axis values to `Numeric` y-axis values.
+
+```ruby
+bar_chart(
+  width: 900,
+  height: 300,
+  values: {
+    'Jan' => 30,
+    'Feb' => 49,
+    'Mar' => 58,
+    'Apr' => 63,
+    'May' => 72,
+    'Jun' => 86,
+    'Jul' => 95,
+    'Aug' => 100,
+    'Sep' => 84,
+    'Oct' => 68,
+    'Nov' => 52,
+    'Dec' => 36,
+  }
+)
+```
+
+![basic bar chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bar-chart.png)
+
+Look into [lib/glimmer/view/bar_chart.rb](/lib/glimmer/view/bar_chart.rb) to learn about all supported options.
+
+**Basic Bar Chart Example:**
+
+[examples/graphs_and_charts/basic_bar_chart.rb](/examples/graphs_and_charts/basic_bar_chart.rb)
+
+```ruby
+require 'glimmer-dsl-libui'
+require 'glimmer/view/bar_chart'
+
+class BasicBarChart
+  include Glimmer::LibUI::Application
+  
+  body {
+    window('Basic Bar Chart', 900, 300) { |main_window|
+      @bar_chart = bar_chart(
+        width: 900,
+        height: 300,
+        values: {
+          'Jan' => 30,
+          'Feb' => 49,
+          'Mar' => 58,
+          'Apr' => 63,
+          'May' => 72,
+          'Jun' => 86,
+          'Jul' => 95,
+          'Aug' => 100,
+          'Sep' => 84,
+          'Oct' => 68,
+          'Nov' => 52,
+          'Dec' => 36,
+        }
+      )
+      
+      on_content_size_changed do
+        @bar_chart.width = main_window.content_size[0]
+        @bar_chart.height = main_window.content_size[1]
+      end
+    }
+  }
+end
+
+BasicBarChart.launch
+```
+
+![basic bar chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bar-chart.png)
 
 ### Line Graph
 
@@ -51,36 +136,36 @@ Note that you can use in absolute mode or relative mode for determining x-axis v
 It supports any `Numeric` y-axis values in addition to `Time` x-axis values.
 
 ```ruby
-      @line_graph = line_graph(
-        width: 900,
-        height: 300,
-        lines: [
-          {
-            name: 'Stock 1',
-            stroke: [163, 40, 39, thickness: 2],
-            values: {
-              Time.new(2030, 12, 1) => 80,
-              Time.new(2030, 12, 2) => 36,
-              Time.new(2030, 12, 4) => 10,
-              Time.new(2030, 12, 5) => 60,
-              Time.new(2030, 12, 6) => 20,
-            },
-            x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
-          },
-          {
-            name: 'Stock 2',
-            stroke: [47, 109, 104, thickness: 2],
-            values: {
-              Time.new(2030, 12, 1) => 62,
-              Time.new(2030, 12, 2) => 0,
-              Time.new(2030, 12, 3) => 90,
-              Time.new(2030, 12, 5) => 0,
-              Time.new(2030, 12, 7) => 17,
-            },
-            x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
-          },
-        ],
-      )
+line_graph(
+  width: 900,
+  height: 300,
+  lines: [
+    {
+      name: 'Stock 1',
+      stroke: [163, 40, 39, thickness: 2],
+      values: {
+        Time.new(2030, 12, 1) => 80,
+        Time.new(2030, 12, 2) => 36,
+        Time.new(2030, 12, 4) => 10,
+        Time.new(2030, 12, 5) => 60,
+        Time.new(2030, 12, 6) => 20,
+      },
+      x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+    },
+    {
+      name: 'Stock 2',
+      stroke: [47, 109, 104, thickness: 2],
+      values: {
+        Time.new(2030, 12, 1) => 62,
+        Time.new(2030, 12, 2) => 0,
+        Time.new(2030, 12, 3) => 90,
+        Time.new(2030, 12, 5) => 0,
+        Time.new(2030, 12, 7) => 17,
+      },
+      x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+    },
+  ],
+)
 ```
 
 ![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
