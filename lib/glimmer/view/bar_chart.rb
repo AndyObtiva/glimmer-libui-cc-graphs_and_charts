@@ -34,9 +34,13 @@ module Glimmer
       
       option :chart_padding_width, default: DEFAULT_CHART_PADDING_WIDTH
       option :chart_padding_height, default: DEFAULT_CHART_PADDING_HEIGHT
-      option :chart_grid_marker_padding_width, default: DEFAULT_CHART_GRID_MARKER_PADDING_WIDTH
-      option :chart_grid_marker_padding_height, default: DEFAULT_CHART_GRID_MARKER_PADDING_HEIGHT
       option :chart_bar_padding_width_percentage, default: DEFAULT_CHART_BAR_PADDING_WIDTH_PERCENTAGE
+      
+      # This is y-axis grid marker padding that is to the left of the bar chart
+      option :chart_grid_marker_padding_width, default: DEFAULT_CHART_GRID_MARKER_PADDING_WIDTH
+      
+      # This is x-axis grid marker padding that is below the bar chart
+      option :chart_grid_marker_padding_height, default: DEFAULT_CHART_GRID_MARKER_PADDING_HEIGHT
       
       option :chart_stroke_grid, default: DEFAULT_CHART_STROKE_GRID
       option :chart_stroke_marker, default: DEFAULT_CHART_STROKE_MARKER
@@ -134,14 +138,18 @@ module Glimmer
       end
       
       def grid_lines
+        x_axis_grid_lines
         y_axis_grid_lines
+      end
+  
+      def x_axis_grid_lines
+        line(chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height, width - chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height) {
+          stroke chart_stroke_grid
+        }
       end
   
       def y_axis_grid_lines
         line(chart_padding_width, chart_padding_height, chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height) {
-          stroke chart_stroke_grid
-        }
-        line(chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height, width - chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height) {
           stroke chart_stroke_grid
         }
         grid_marker_number_font = chart_font_marker_text.merge(size: 11)
@@ -229,6 +237,20 @@ module Glimmer
           rectangle(x, y, bar_width, bar_height) {
             fill chart_color_bar
           }
+          
+          x_axis_grid_marker_text = x_value.to_s
+          grid_marker_number_font = chart_font_marker_text.merge(size: 11)
+          x_axis_grid_marker_text_size = estimate_width_of_text(x_axis_grid_marker_text, grid_marker_number_font)
+          middle_of_bar_x = x + bar_width/2.0
+          x_axis_grid_marker_x = middle_of_bar_x - x_axis_grid_marker_text_size/2.0
+          middle_of_x_axis_grid_marker_padding = height - chart_grid_marker_padding_height/2.0
+          x_axis_grid_marker_y = middle_of_x_axis_grid_marker_padding - chart_font_marker_text[:size]/2.0
+          text(x_axis_grid_marker_x, x_axis_grid_marker_y, x_axis_grid_marker_text_size) {
+            string(x_axis_grid_marker_text) {
+              font grid_marker_number_font
+              color chart_color_marker_text
+            }
+          }
         end
       end
       
@@ -248,7 +270,7 @@ module Glimmer
       def estimate_width_of_text(text_string, font_properties)
         # TODO refactor move this method to somewhere common like Glimmer module
         font_size = font_properties[:size] || 16
-        estimated_font_width = 0.62 * font_size
+        estimated_font_width = 0.63 * font_size
         text_string.chars.size * estimated_font_width
       end
       
