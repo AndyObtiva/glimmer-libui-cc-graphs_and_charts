@@ -16,9 +16,18 @@ module Glimmer
       
       DEFAULT_CHART_PADDING_WIDTH = 5.0
       DEFAULT_CHART_PADDING_HEIGHT = 5.0
-      DEFAULT_CHART_GRID_MARKER_PADDING_WIDTH = 37.0
-      DEFAULT_CHART_GRID_MARKER_PADDING_HEIGHT = 37.0
       DEFAULT_CHART_BAR_PADDING_WIDTH_PERCENTAGE = 30.0
+      
+      # This is y-axis grid marker padding that is to the left of the bar chart
+      DEFAULT_CHART_GRID_MARKER_PADDING_WIDTH = 37.0
+      # This is x-axis grid marker padding that is below the bar chart
+      DEFAULT_CHART_GRID_MARKER_PADDING_HEIGHT = 30.0
+      
+      # This is y-axis label padding that is to the left of the bar chart
+      DEFAULT_CHART_Y_AXIS_LABEL_PADDING_WIDTH = 30.0
+      
+      # This is x-axis label padding that is below the bar chart
+      DEFAULT_CHART_X_AXIS_LABEL_PADDING_HEIGHT = 30.0
       
       DEFAULT_CHART_STROKE_GRID = [185, 184, 185]
       DEFAULT_CHART_STROKE_MARKER = [185, 184, 185]
@@ -42,6 +51,12 @@ module Glimmer
       # This is x-axis grid marker padding that is below the bar chart
       option :chart_grid_marker_padding_height, default: DEFAULT_CHART_GRID_MARKER_PADDING_HEIGHT
       
+      # This is y-axis label padding that is to the left of the bar chart
+      option :chart_y_axis_label_padding_width, default: DEFAULT_CHART_Y_AXIS_LABEL_PADDING_WIDTH
+      
+      # This is x-axis label padding that is below the bar chart
+      option :chart_x_axis_label_padding_height, default: DEFAULT_CHART_X_AXIS_LABEL_PADDING_HEIGHT
+      
       option :chart_stroke_grid, default: DEFAULT_CHART_STROKE_GRID
       option :chart_stroke_marker, default: DEFAULT_CHART_STROKE_MARKER
       option :chart_stroke_marker_line, default: DEFAULT_CHART_STROKE_MARKER_LINE
@@ -63,6 +78,8 @@ module Glimmer
       #   '7' => 03,
       # }
       option :values, default: {}
+      option :x_axis_label, default: nil
+      option :y_axis_label, default: nil
       
       attr_reader :bar_width_including_padding
       
@@ -124,11 +141,11 @@ module Glimmer
       end
       
       def width_drawable
-        width - 2.0*chart_padding_width - chart_grid_marker_padding_width
+        width - 2.0*chart_padding_width - chart_grid_marker_padding_width - chart_y_axis_label_padding_width
       end
       
       def height_drawable
-        height - 2.0*chart_padding_height - chart_grid_marker_padding_height
+        height - 2.0*chart_padding_height - chart_grid_marker_padding_height - chart_x_axis_label_padding_height
       end
       
       def chart_background
@@ -140,19 +157,23 @@ module Glimmer
       def grid_lines
         x_axis_grid_lines
         y_axis_grid_lines
+        x_axis_label_text
+        y_axis_label_text
       end
   
       def x_axis_grid_lines
-        line(chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height, width - chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height) {
+        line_y = height - chart_padding_height - chart_grid_marker_padding_height - chart_x_axis_label_padding_height
+        line(chart_x_axis_label_padding_height + chart_padding_width, line_y, width - chart_padding_width, line_y) {
           stroke chart_stroke_grid
         }
       end
   
       def y_axis_grid_lines
-        line(chart_padding_width, chart_padding_height, chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height) {
+        line_x = chart_y_axis_label_padding_width + chart_padding_width
+        line(line_x, chart_padding_height, line_x, height - chart_padding_height - chart_grid_marker_padding_height - chart_x_axis_label_padding_height) {
           stroke chart_stroke_grid
         }
-        grid_marker_number_font = chart_font_marker_text.merge(size: 11)
+        grid_marker_number_font = marker_font
         @grid_marker_number_values ||= []
         @grid_marker_numbers ||= []
         @chart_stroke_marker_values ||= []
@@ -210,13 +231,13 @@ module Glimmer
         if @y_axis_grid_marker_points.nil?
           if values.any?
             chart_y_max = [y_value_max, 1].max
-            current_chart_height = (height - chart_padding_height * 2 - chart_grid_marker_padding_height)
+            current_chart_height = (height - chart_padding_height * 2 - chart_grid_marker_padding_height - chart_x_axis_label_padding_height)
             y_value_count = chart_y_max.ceil
             @y_axis_grid_marker_points = chart_y_max.to_i.times.map do |marker_index|
-              x = chart_padding_width
+              x = chart_y_axis_label_padding_width + chart_padding_width
               y_value = y_value_count - marker_index
               scaled_y_value = y_value.to_f * y_resolution.to_f
-              y = height - chart_padding_height - chart_grid_marker_padding_height - scaled_y_value
+              y = height - chart_padding_height - chart_grid_marker_padding_height - chart_x_axis_label_padding_height - scaled_y_value
               {x: x, y: y}
             end
           end
@@ -225,25 +246,44 @@ module Glimmer
         @y_axis_grid_marker_points
       end
       
+      def x_axis_label_text
+        x_axis_label_font = marker_font
+        x_axis_label_width = estimate_width_of_text(x_axis_label, x_axis_label_font)
+        middle_of_x_axis_label_padding_x = chart_y_axis_label_padding_width + (width - chart_y_axis_label_padding_width)/2.0
+        x_axis_label_x = middle_of_x_axis_label_padding_x - x_axis_label_width/2.0
+        middle_of_x_axis_label_padding_y = height - (chart_x_axis_label_padding_height/2.0)
+        x_axis_label_y = middle_of_x_axis_label_padding_y - x_axis_label_font[:size]/2.0
+        text(x_axis_label_x, x_axis_label_y, x_axis_label_width) {
+          string(x_axis_label) {
+            font x_axis_label_font
+            color chart_color_marker_text
+          }
+        }
+      end
+      
+      def y_axis_label_text
+#         chart_x_axis_label_padding_height # TODO display label
+      end
+      
       def max_marker_count
         [(0.15*height).to_i, 1].max
       end
       
       def bars
         values.each_with_index do |(x_value, y_value), index|
-          x = chart_grid_marker_padding_width + chart_padding_width + (index * bar_width_including_padding) + bar_padding_width
+          x = chart_y_axis_label_padding_width + chart_grid_marker_padding_width + chart_padding_width + (index * bar_width_including_padding) + bar_padding_width
           bar_height = y_value * y_resolution
-          y = height - chart_grid_marker_padding_height - chart_padding_height - bar_height
+          y = height - chart_grid_marker_padding_height - chart_x_axis_label_padding_height - chart_padding_height - bar_height
           rectangle(x, y, bar_width, bar_height) {
             fill chart_color_bar
           }
           
           x_axis_grid_marker_text = x_value.to_s
-          grid_marker_number_font = chart_font_marker_text.merge(size: 11)
+          grid_marker_number_font = marker_font
           x_axis_grid_marker_text_size = estimate_width_of_text(x_axis_grid_marker_text, grid_marker_number_font)
           middle_of_bar_x = x + bar_width/2.0
           x_axis_grid_marker_x = middle_of_bar_x - x_axis_grid_marker_text_size/2.0
-          middle_of_x_axis_grid_marker_padding = height - chart_grid_marker_padding_height/2.0
+          middle_of_x_axis_grid_marker_padding = height - chart_grid_marker_padding_height/2.0 - chart_x_axis_label_padding_height
           x_axis_grid_marker_y = middle_of_x_axis_grid_marker_padding - chart_font_marker_text[:size]/2.0
           text(x_axis_grid_marker_x, x_axis_grid_marker_y, x_axis_grid_marker_text_size) {
             string(x_axis_grid_marker_text) {
@@ -252,6 +292,10 @@ module Glimmer
             }
           }
         end
+      end
+      
+      def marker_font
+        chart_font_marker_text.merge(size: 11)
       end
       
       # this is the multiplier that we must multiply by the relative y value

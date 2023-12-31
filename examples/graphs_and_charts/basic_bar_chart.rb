@@ -12,6 +12,8 @@ class BasicBarChart
       @bar_chart = bar_chart(
         width: 900,
         height: 300,
+        x_axis_label: 'Month',
+        y_axis_label: 'New Customer Accounts',
         values: {
           'Jan' => 30,
           'Feb' => 49,
@@ -25,7 +27,7 @@ class BasicBarChart
           'Oct' => 68,
           'Nov' => 52,
           'Dec' => 36,
-        }
+        },
       )
       
       on_content_size_changed do

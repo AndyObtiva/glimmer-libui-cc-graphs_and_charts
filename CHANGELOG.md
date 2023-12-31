@@ -2,6 +2,7 @@
 
 ## 0.2.2
 
+- Show x-axis values in `bar_chart`
 - Fix issue with `bar_chart` vertical scaling of grid markers when numbers are larger than 1000 and have `K` in them by disabling `K` formatting for now (the issue was seeing the same marker number twice because two consecutive markers were calculated with similar shortened values; e.g. both 10K when one is 10100 and the other is 10750).
 
 ## 0.2.1
