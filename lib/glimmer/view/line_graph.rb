@@ -195,6 +195,7 @@ module Glimmer
             value
           end
           grid_marker_number_value = @grid_marker_number_values[index]
+          # TODO consider not caching the following line as that might save memory and run faster without caching
           @grid_marker_numbers[index] ||= (grid_marker_number_value >= 1000) ? "#{grid_marker_number_value / 1000}K" : grid_marker_number_value.to_s
           grid_marker_number = @grid_marker_numbers[index]
           @graph_stroke_marker_values[index] ||= LineGraph.interpret_color(graph_stroke_marker).tap do |color_hash|

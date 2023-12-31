@@ -17,6 +17,7 @@ module Glimmer
       DEFAULT_CHART_PADDING_WIDTH = 5.0
       DEFAULT_CHART_PADDING_HEIGHT = 5.0
       DEFAULT_CHART_GRID_MARKER_PADDING_WIDTH = 37.0
+      DEFAULT_CHART_GRID_MARKER_PADDING_HEIGHT = 37.0
       DEFAULT_CHART_BAR_PADDING_WIDTH_PERCENTAGE = 30.0
       
       DEFAULT_CHART_STROKE_GRID = [185, 184, 185]
@@ -34,6 +35,7 @@ module Glimmer
       option :chart_padding_width, default: DEFAULT_CHART_PADDING_WIDTH
       option :chart_padding_height, default: DEFAULT_CHART_PADDING_HEIGHT
       option :chart_grid_marker_padding_width, default: DEFAULT_CHART_GRID_MARKER_PADDING_WIDTH
+      option :chart_grid_marker_padding_height, default: DEFAULT_CHART_GRID_MARKER_PADDING_HEIGHT
       option :chart_bar_padding_width_percentage, default: DEFAULT_CHART_BAR_PADDING_WIDTH_PERCENTAGE
       
       option :chart_stroke_grid, default: DEFAULT_CHART_STROKE_GRID
@@ -89,7 +91,7 @@ module Glimmer
       def clear_drawing_cache
         @y_resolution = nil
         @bar_width_including_padding = nil
-        @grid_marker_points = nil
+        @y_axis_grid_marker_points = nil
         @grid_marker_number_values = nil
         @grid_marker_numbers = nil
         @chart_stroke_marker_values = nil
@@ -122,7 +124,7 @@ module Glimmer
       end
       
       def height_drawable
-        height - 2.0*chart_padding_height
+        height - 2.0*chart_padding_height - chart_grid_marker_padding_height
       end
       
       def chart_background
@@ -130,12 +132,16 @@ module Glimmer
           fill 255, 255, 255
         }
       end
-  
+      
       def grid_lines
-        line(chart_padding_width, chart_padding_height, chart_padding_width, height - chart_padding_height) {
+        y_axis_grid_lines
+      end
+  
+      def y_axis_grid_lines
+        line(chart_padding_width, chart_padding_height, chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height) {
           stroke chart_stroke_grid
         }
-        line(chart_padding_width, height - chart_padding_height, width - chart_padding_width, height - chart_padding_height) {
+        line(chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height, width - chart_padding_width, height - chart_padding_height - chart_grid_marker_padding_height) {
           stroke chart_stroke_grid
         }
         grid_marker_number_font = chart_font_marker_text.merge(size: 11)
@@ -143,21 +149,23 @@ module Glimmer
         @grid_marker_numbers ||= []
         @chart_stroke_marker_values ||= []
         @mod_values ||= []
-        grid_marker_points.each_with_index do |marker_point, index|
+        y_axis_grid_marker_points.each_with_index do |marker_point, index|
           @grid_marker_number_values[index] ||= begin
-            value = (grid_marker_points.size - index).to_i
+            value = (y_axis_grid_marker_points.size - index).to_i
             value = y_value_max if !y_value_max.nil? && y_value_max.to_i != y_value_max && index == 0
             value
           end
           grid_marker_number_value = @grid_marker_number_values[index]
-          @grid_marker_numbers[index] ||= (grid_marker_number_value >= 1000) ? "#{grid_marker_number_value / 1000}K" : grid_marker_number_value.to_s
-          grid_marker_number = @grid_marker_numbers[index]
+# figuring out how to setup 1K numbers without repeating a number twice is more complicated than just enabling this code
+# disabling for now
+#           @grid_marker_numbers[index] ||= (grid_marker_number_value >= 1000) ? "#{grid_marker_number_value / 1000}K" : grid_marker_number_value.to_s
+          grid_marker_number = grid_marker_number_value.to_s
           @chart_stroke_marker_values[index] ||= BarChart.interpret_color(chart_stroke_marker).tap do |color_hash|
-            color_hash[:thickness] = (index != grid_marker_points.size - 1 ? 2 : 1) if color_hash[:thickness].nil?
+            color_hash[:thickness] = (index != y_axis_grid_marker_points.size - 1 ? 2 : 1) if color_hash[:thickness].nil?
           end
           chart_stroke_marker_value = @chart_stroke_marker_values[index]
           @mod_values[index] ||= begin
-            mod_value_multiplier = ((grid_marker_points.size / max_marker_count) + 1)
+            mod_value_multiplier = ((y_axis_grid_marker_points.size / max_marker_count) + 1)
             [(5 * mod_value_multiplier), 1].max
           end
           mod_value = @mod_values[index]
@@ -173,7 +181,7 @@ module Glimmer
               stroke chart_stroke_marker_value
             }
           end
-          if grid_marker_number_value % mod_value == comparison_value && grid_marker_number_value != grid_marker_points.size
+          if grid_marker_number_value % mod_value == comparison_value && grid_marker_number_value != y_axis_grid_marker_points.size
             line(marker_point[:x], marker_point[:y], marker_point[:x] + width - chart_padding_width, marker_point[:y]) {
               stroke chart_stroke_marker_line
             }
@@ -190,23 +198,23 @@ module Glimmer
         end
       end
       
-      def grid_marker_points
-        if @grid_marker_points.nil?
+      def y_axis_grid_marker_points
+        if @y_axis_grid_marker_points.nil?
           if values.any?
             chart_y_max = [y_value_max, 1].max
-            current_chart_height = (height - chart_padding_height * 2)
+            current_chart_height = (height - chart_padding_height * 2 - chart_grid_marker_padding_height)
             y_value_count = chart_y_max.ceil
-            @grid_marker_points = chart_y_max.to_i.times.map do |marker_index|
+            @y_axis_grid_marker_points = chart_y_max.to_i.times.map do |marker_index|
               x = chart_padding_width
               y_value = y_value_count - marker_index
               scaled_y_value = y_value.to_f * y_resolution.to_f
-              y = height - chart_padding_height - scaled_y_value
+              y = height - chart_padding_height - chart_grid_marker_padding_height - scaled_y_value
               {x: x, y: y}
             end
           end
         end
 
-        @grid_marker_points
+        @y_axis_grid_marker_points
       end
       
       def max_marker_count
@@ -217,7 +225,7 @@ module Glimmer
         values.each_with_index do |(x_value, y_value), index|
           x = chart_grid_marker_padding_width + chart_padding_width + (index * bar_width_including_padding) + bar_padding_width
           bar_height = y_value * y_resolution
-          y = height - chart_padding_height - bar_height
+          y = height - chart_grid_marker_padding_height - chart_padding_height - bar_height
           rectangle(x, y, bar_width, bar_height) {
             fill chart_color_bar
           }

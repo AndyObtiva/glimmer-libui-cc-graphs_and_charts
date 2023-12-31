@@ -1,5 +1,6 @@
 # TODO
 
+- Show x-axis values in `bar_chart`
 - Support non-Integer values for `line_graph` in relative mode
 - Support showing grid marker lines with non-Integer values (when y-axis values are all less than 1 subdivide by fractions)
 - Display the axis labels of the x-axis and y-axis in `line_graph`

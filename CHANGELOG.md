@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.2
+
+- Fix issue with `bar_chart` vertical scaling of grid markers when numbers are larger than 1000 and have `K` in them by disabling `K` formatting for now (the issue was seeing the same marker number twice because two consecutive markers were calculated with similar shortened values; e.g. both 10K when one is 10100 and the other is 10750).
+
 ## 0.2.1
 
 - Fix clipped text of grid markers when they include 1000 displayed as 1K
