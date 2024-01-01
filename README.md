@@ -50,6 +50,8 @@ You can then nest `bar_chart` under `window` or some container like `vertical_bo
 bar_chart(
   width: 900,
   height: 300,
+  x_axis_label: 'Month',
+  y_axis_label: 'New Customer Accounts',
   values: {
     'Jan' => 30,
     'Feb' => 49,
@@ -87,6 +89,8 @@ class BasicBarChart
       @bar_chart = bar_chart(
         width: 900,
         height: 300,
+        x_axis_label: 'Month',
+        y_axis_label: 'New Customer Accounts',
         values: {
           'Jan' => 30,
           'Feb' => 49,
