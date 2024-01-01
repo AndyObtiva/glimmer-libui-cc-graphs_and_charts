@@ -332,5 +332,5 @@ Copyright
 
 [MIT](LICENSE.txt)
 
-Copyright (c) 2023 Andy Maleh. See
+Copyright (c) 2023-2024 Andy Maleh. See
 [LICENSE.txt](LICENSE.txt) for further details.

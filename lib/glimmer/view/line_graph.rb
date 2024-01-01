@@ -553,6 +553,7 @@ module Glimmer
       end
       
       def estimate_width_of_text(text_string, font_properties)
+        return 0 if text_string.to_s.empty?
         font_size = font_properties[:size] || 16
         estimated_font_width = 0.63 * font_size
         text_string.chars.size * estimated_font_width

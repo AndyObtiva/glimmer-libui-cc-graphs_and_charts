@@ -24,10 +24,10 @@ module Glimmer
       DEFAULT_CHART_GRID_MARKER_PADDING_HEIGHT = 30.0
       
       # This is y-axis label padding that is to the left of the bar chart
-      DEFAULT_CHART_Y_AXIS_LABEL_PADDING_WIDTH = 30.0
+      DEFAULT_CHART_Y_AXIS_LABEL_PADDING_WIDTH = 25.0
       
       # This is x-axis label padding that is below the bar chart
-      DEFAULT_CHART_X_AXIS_LABEL_PADDING_HEIGHT = 30.0
+      DEFAULT_CHART_X_AXIS_LABEL_PADDING_HEIGHT = 25.0
       
       DEFAULT_CHART_STROKE_GRID = [185, 184, 185]
       DEFAULT_CHART_STROKE_MARKER = [185, 184, 185]
@@ -83,6 +83,11 @@ module Glimmer
       
       attr_reader :bar_width_including_padding
       
+      before_body do
+        self.chart_y_axis_label_padding_width = 0 if y_axis_label.to_s.empty?
+        self.chart_x_axis_label_padding_height = 0 if x_axis_label.to_s.empty?
+      end
+      
       after_body do
         observe(self, :values) do
           clear_drawing_cache
@@ -117,6 +122,7 @@ module Glimmer
         @grid_marker_numbers = nil
         @chart_stroke_marker_values = nil
         @mod_values = nil
+        @y_value_max = nil
       end
       
       def calculate_dynamic_options
@@ -175,7 +181,7 @@ module Glimmer
         }
         grid_marker_number_font = marker_font
         @grid_marker_number_values ||= []
-        @grid_marker_numbers ||= []
+#         @grid_marker_numbers ||= []
         @chart_stroke_marker_values ||= []
         @mod_values ||= []
         y_axis_grid_marker_points.each_with_index do |marker_point, index|
@@ -252,7 +258,7 @@ module Glimmer
         middle_of_x_axis_label_padding_x = chart_y_axis_label_padding_width + (width - chart_y_axis_label_padding_width)/2.0
         x_axis_label_x = middle_of_x_axis_label_padding_x - x_axis_label_width/2.0
         middle_of_x_axis_label_padding_y = height - (chart_x_axis_label_padding_height/2.0)
-        x_axis_label_y = middle_of_x_axis_label_padding_y - x_axis_label_font[:size]/2.0
+        x_axis_label_y = middle_of_x_axis_label_padding_y - x_axis_label_font[:size]/2.0 - 7.0
         text(x_axis_label_x, x_axis_label_y, x_axis_label_width) {
           string(x_axis_label) {
             font x_axis_label_font
@@ -262,9 +268,22 @@ module Glimmer
       end
       
       def y_axis_label_text
-#         chart_x_axis_label_padding_height # TODO display label
+        y_axis_label_font = marker_font
+        y_axis_label_width = estimate_width_of_text(y_axis_label, y_axis_label_font)
+        middle_of_y_axis_label_padding_x = chart_y_axis_label_padding_width/2.0
+        y_axis_label_x = middle_of_y_axis_label_padding_x - y_axis_label_width/2.0
+        middle_of_y_axis_label_padding_y = (height - chart_x_axis_label_padding_height)/2.0
+        y_axis_label_y = middle_of_y_axis_label_padding_y - y_axis_label_font[:size]/2.0
+        text(y_axis_label_x, y_axis_label_y, y_axis_label_width) {
+          string(y_axis_label) {
+            font y_axis_label_font
+            color chart_color_marker_text
+          }
+          transform {
+            rotate(middle_of_y_axis_label_padding_x, middle_of_y_axis_label_padding_y, -90)
+          }
+        }
       end
-      
       def max_marker_count
         [(0.15*height).to_i, 1].max
       end
@@ -284,7 +303,7 @@ module Glimmer
           middle_of_bar_x = x + bar_width/2.0
           x_axis_grid_marker_x = middle_of_bar_x - x_axis_grid_marker_text_size/2.0
           middle_of_x_axis_grid_marker_padding = height - chart_grid_marker_padding_height/2.0 - chart_x_axis_label_padding_height
-          x_axis_grid_marker_y = middle_of_x_axis_grid_marker_padding - chart_font_marker_text[:size]/2.0
+          x_axis_grid_marker_y = middle_of_x_axis_grid_marker_padding - chart_font_marker_text[:size]/2.0 - 7.0
           text(x_axis_grid_marker_x, x_axis_grid_marker_y, x_axis_grid_marker_text_size) {
             string(x_axis_grid_marker_text) {
               font grid_marker_number_font
@@ -312,6 +331,7 @@ module Glimmer
       end
       
       def estimate_width_of_text(text_string, font_properties)
+        return 0 if text_string.to_s.empty?
         # TODO refactor move this method to somewhere common like Glimmer module
         font_size = font_properties[:size] || 16
         estimated_font_width = 0.63 * font_size

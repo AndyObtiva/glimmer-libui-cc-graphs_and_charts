@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
   s.authors = ["Andy Maleh".freeze]
-  s.date = "2023-12-31"
+  s.date = "2024-01-01"
   s.description = "Graphs and Charts (Custom Controls) for Glimmer DSL for LibUI, like Line Graph.".freeze
   s.email = "andy.am@gmail.com".freeze
   s.extra_rdoc_files = [
@@ -39,7 +39,7 @@ Gem::Specification.new do |s|
 
   s.specification_version = 4
 
-  s.add_runtime_dependency(%q<glimmer-dsl-libui>.freeze, ["~> 0.11".freeze])
+  s.add_runtime_dependency(%q<glimmer-dsl-libui>.freeze, [">= 0.11.8".freeze, "< 2.0.0".freeze])
   s.add_development_dependency(%q<rspec>.freeze, ["~> 3.5.0".freeze])
   s.add_development_dependency(%q<juwelier>.freeze, ["= 2.4.9".freeze])
   s.add_development_dependency(%q<simplecov>.freeze, [">= 0".freeze])
