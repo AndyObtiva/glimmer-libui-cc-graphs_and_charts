@@ -121,8 +121,9 @@ module Glimmer
         @grid_marker_number_values = nil
         @grid_marker_numbers = nil
         @chart_stroke_marker_values = nil
-        @mod_values = nil
+        @y_axis_mod_values = nil
         @y_value_max = nil
+        @bars_data = nil
       end
       
       def calculate_dynamic_options
@@ -183,7 +184,7 @@ module Glimmer
         @grid_marker_number_values ||= []
 #         @grid_marker_numbers ||= []
         @chart_stroke_marker_values ||= []
-        @mod_values ||= []
+        @y_axis_mod_values ||= []
         y_axis_grid_marker_points.each_with_index do |marker_point, index|
           @grid_marker_number_values[index] ||= begin
             value = (y_axis_grid_marker_points.size - index).to_i
@@ -199,11 +200,11 @@ module Glimmer
             color_hash[:thickness] = (index != y_axis_grid_marker_points.size - 1 ? 2 : 1) if color_hash[:thickness].nil?
           end
           chart_stroke_marker_value = @chart_stroke_marker_values[index]
-          @mod_values[index] ||= begin
-            mod_value_multiplier = ((y_axis_grid_marker_points.size / max_marker_count) + 1)
+          @y_axis_mod_values[index] ||= begin
+            mod_value_multiplier = ((y_axis_grid_marker_points.size / y_axis_max_marker_count) + 1)
             [(5 * mod_value_multiplier), 1].max
           end
-          mod_value = @mod_values[index]
+          mod_value = @y_axis_mod_values[index]
           comparison_value = (mod_value > 2) ? 0 : 1
           if mod_value > 2
             if grid_marker_number_value % mod_value == comparison_value
@@ -284,19 +285,24 @@ module Glimmer
           }
         }
       end
-      def max_marker_count
-        [(0.15*height).to_i, 1].max
+      
+      def y_axis_max_marker_count
+        [(0.15*height_drawable).to_i, 1].max
       end
       
       def bars
-        values.each_with_index do |(x_value, y_value), index|
+        @bars_data = calculate_bars_data
+        @bars_data.each do |bar_data|
+          bar(bar_data)
+        end
+        x_axis_grid_markers(@bars_data)
+      end
+      
+      def calculate_bars_data
+        values.each_with_index.map do |(x_value, y_value), index|
           x = chart_y_axis_label_padding_width + chart_grid_marker_padding_width + chart_padding_width + (index * bar_width_including_padding) + bar_padding_width
           bar_height = y_value * y_resolution
           y = height - chart_grid_marker_padding_height - chart_x_axis_label_padding_height - chart_padding_height - bar_height
-          rectangle(x, y, bar_width, bar_height) {
-            fill chart_color_bar
-          }
-          
           x_axis_grid_marker_text = x_value.to_s
           grid_marker_number_font = marker_font
           x_axis_grid_marker_text_size = estimate_width_of_text(x_axis_grid_marker_text, grid_marker_number_font)
@@ -304,9 +310,45 @@ module Glimmer
           x_axis_grid_marker_x = middle_of_bar_x - x_axis_grid_marker_text_size/2.0
           middle_of_x_axis_grid_marker_padding = height - chart_grid_marker_padding_height/2.0 - chart_x_axis_label_padding_height
           x_axis_grid_marker_y = middle_of_x_axis_grid_marker_padding - chart_font_marker_text[:size]/2.0 - 7.0
-          text(x_axis_grid_marker_x, x_axis_grid_marker_y, x_axis_grid_marker_text_size) {
-            string(x_axis_grid_marker_text) {
-              font grid_marker_number_font
+          {
+            index: index,
+            x: x,
+            y: y,
+            bar_width: bar_width,
+            bar_height: bar_height,
+            x_axis_grid_marker_x: x_axis_grid_marker_x,
+            x_axis_grid_marker_y: x_axis_grid_marker_y,
+            x_axis_grid_marker_text: x_axis_grid_marker_text,
+            x_axis_grid_marker_text_size: x_axis_grid_marker_text_size,
+          }
+        end
+      end
+      
+      def bar(bar_data)
+        rectangle(bar_data[:x], bar_data[:y], bar_data[:bar_width], bar_data[:bar_height]) {
+          fill chart_color_bar
+        }
+      end
+      
+      def x_axis_grid_markers(bars_data)
+        skip_count = 0
+        collision_detected = true
+        while collision_detected
+          collision_detected = bars_data.each_with_index.any? do |bar_data, index|
+            next if index == 0
+            last_bar_text_data = bars_data[index - 1]
+            bar_data[:x_axis_grid_marker_x] < (last_bar_text_data[:x_axis_grid_marker_x] + last_bar_text_data[:x_axis_grid_marker_text_size] + 5)
+          end
+          if collision_detected
+            skip_count += 1
+            bars_data = bars_data.each_with_index.select {|bar_data, index| index % (skip_count+1) == 0 }.map(&:first)
+          end
+        end
+        x_axis_grid_marker_font = marker_font
+        bars_data.each do |bar_data|
+          text(bar_data[:x_axis_grid_marker_x], bar_data[:x_axis_grid_marker_y], bar_data[:x_axis_grid_marker_text_size]) {
+            string(bar_data[:x_axis_grid_marker_text]) {
+              font x_axis_grid_marker_font
               color chart_color_marker_text
             }
           }

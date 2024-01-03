@@ -1,6 +1,5 @@
 # TODO
 
-- Display less `bar_chart` horizontal grid markers when the width is decreased just like we do with vertical grid markers
 - Support non-Integer values for `line_graph` in relative mode
 - Support showing grid marker lines with non-Integer values (when y-axis values are all less than 1 subdivide by fractions)
 - Display the axis labels of the x-axis and y-axis in `line_graph`
@@ -12,3 +11,4 @@
 - Consider supporting custom controls like `table_and_line_graph` that would render data into a table and also visualize it in a `line_graph` above, below, or to the side of the `table`
 - Consider the idea of supporting ChartKick's API syntax to provide familiar simple usage to Rails developers
 - Support specifying min_x and max_x to start and end graph at (in case the user wants to see a different timeline from what the data strictly provides)
+- Consider rotating bar chart x-axis labels to make room when shrinking the graph width

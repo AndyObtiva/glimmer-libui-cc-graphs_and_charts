@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.3
+
+- Automatically scale number of `bar_chart` horizontal grid markers so that if the chart width gets small enough for them to run into each other, less of them are displayed
+
 ## 0.2.2
 
 - Display `bar_chart` axis labels `x_axis_label` and `y_axis_label`
