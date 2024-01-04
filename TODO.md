@@ -12,3 +12,7 @@
 - Consider the idea of supporting ChartKick's API syntax to provide familiar simple usage to Rails developers
 - Support specifying min_x and max_x to start and end graph at (in case the user wants to see a different timeline from what the data strictly provides)
 - Consider rotating bar chart x-axis labels to make room when shrinking the graph width
+
+## Types of Graphs and Charts
+
+- Support Stacked Bar Charts (as perhaps a variation on `bar_chart`)
