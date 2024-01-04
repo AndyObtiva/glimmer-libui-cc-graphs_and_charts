@@ -3,7 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts.svg)](http://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts)
 [![Join the chat at https://gitter.im/AndyObtiva/glimmer](https://badges.gitter.im/AndyObtiva/glimmer.svg)](https://gitter.im/AndyObtiva/glimmer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Graphs and Charts (Custom Controls) for [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui)
+Graphs and Charts (Custom Controls for [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui))
 
 ![bar chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bar-chart.png)
 
