@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.0
+
+- New `examples/graphs_and_charts/basic_bubble_chart.rb`
+
 ## 0.2.3
 
 - Automatically scale number of `bar_chart` horizontal grid markers so that if the chart width gets small enough for them to run into each other, less of them are displayed

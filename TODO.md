@@ -1,5 +1,7 @@
 # TODO
 
+- Initial implementation of `bar_chart` custom control
+- Highlight display information for `bar_chart` x-axis point's data for y-axis and z-axis (+ supporting labels for them)
 - Support non-Integer values for `line_graph` in relative mode
 - Support showing grid marker lines with non-Integer values (when y-axis values are all less than 1 subdivide by fractions)
 - Display the axis labels of the x-axis and y-axis in `line_graph`
