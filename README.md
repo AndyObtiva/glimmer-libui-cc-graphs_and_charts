@@ -9,6 +9,8 @@ Graphs and Charts (Custom Controls for [Glimmer DSL for LibUI](https://github.co
 
 ![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
 
+![bubble chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bubble-chart.png)
+
 ## Setup
 
 Add this line to Bundler `Gemfile`:
@@ -313,6 +315,202 @@ BasicLineGraphRelative.launch
 ```
 
 ![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
+
+### Bubble Chart
+
+To load the `bubble_chart` custom control, add this line to your Ruby file:
+
+```ruby
+require 'glimmer/view/bubble_chart'
+```
+
+This makes the `bubble_chart` [Glimmer DSL for LibUI Custom Control](https://github.com/AndyObtiva/glimmer-dsl-libui#custom-components) available in the Glimmer GUI DSL.
+You can then nest `bubble_chart` under `window` or some container like `vertical_box`. By the way, `bubble_chart` is implemented on top of the [`area` Glimmer DSL for LibUI control](https://github.com/AndyObtiva/glimmer-dsl-libui#area-api).
+
+`values` are a `Hash` map of `Time` x-axis values to `Hash` map of `Numeric` y-axis values to `Numeric` z-axis values.
+
+```ruby
+bubble_chart(
+  width: 900,
+  height: 300,
+  chart_color_bubble: [239, 9, 9],
+  values: {
+    Time.new(2030, 12, 1, 13, 0, 0) => {
+      1 => 4,
+      2 => 8,
+      8 => 3,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 2) => {
+      1 => 1,
+      2 => 5,
+      7 => 2,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 4) => {
+      1 => 2,
+      2 => 3,
+      4 => 4,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 6) => {
+      1 => 7,
+      2 => 2,
+      7 => 5,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 8) => {
+      1 => 6,
+      2 => 8,
+      8 => 1,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 10) => {
+      1 => 1,
+      2 => 2,
+      3 => 9,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 12) => {
+      1 => 5,
+      2 => 12,
+      5 => 17,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 14) => {
+      1 => 9,
+      2 => 2,
+      6 => 10,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 16) => {
+      1 => 0,
+      2 => 5,
+      7 => 8,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 18) => {
+      1 => 9,
+      3 => 3,
+      5 => 6,
+      10 => 0
+    },
+    Time.new(2030, 12, 1, 13, 0, 20) => {
+      2 => 2,
+      4 => 4,
+      7 => 7,
+      10 => 0
+    },
+  },
+  x_value_format: -> (time) {time.strftime('%M:%S')},
+)
+```
+
+![basic bubble chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bubble-chart.png)
+
+Look into [lib/glimmer/view/bar_chart.rb](/lib/glimmer/view/bar_chart.rb) to learn about all supported options.
+
+**Basic Bubble Chart Example:**
+
+[examples/graphs_and_charts/basic_bar_chart.rb](/examples/graphs_and_charts/basic_bar_chart.rb)
+
+```ruby
+require 'glimmer-dsl-libui'
+require 'glimmer/view/bubble_chart'
+
+class BasicBubbleChart
+  include Glimmer::LibUI::Application
+  
+  body {
+    window('Basic Line Graph', 900, 300) { |main_window|
+      @bubble_chart = bubble_chart(
+        width: 900,
+        height: 300,
+        chart_color_bubble: [239, 9, 9],
+        values: {
+          Time.new(2030, 12, 1, 13, 0, 0) => {
+            1 => 4,
+            2 => 8,
+            8 => 3,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 2) => {
+            1 => 1,
+            2 => 5,
+            7 => 2,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 4) => {
+            1 => 2,
+            2 => 3,
+            4 => 4,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 6) => {
+            1 => 7,
+            2 => 2,
+            7 => 5,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 8) => {
+            1 => 6,
+            2 => 8,
+            8 => 1,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 10) => {
+            1 => 1,
+            2 => 2,
+            3 => 9,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 12) => {
+            1 => 5,
+            2 => 12,
+            5 => 17,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 14) => {
+            1 => 9,
+            2 => 2,
+            6 => 10,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 16) => {
+            1 => 0,
+            2 => 5,
+            7 => 8,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 18) => {
+            1 => 9,
+            3 => 3,
+            5 => 6,
+            10 => 0
+          },
+          Time.new(2030, 12, 1, 13, 0, 20) => {
+            2 => 2,
+            4 => 4,
+            7 => 7,
+            10 => 0
+          },
+        },
+        x_value_format: -> (time) {time.strftime('%M:%S')},
+      )
+      
+      on_content_size_changed do
+        @bubble_chart.width = main_window.content_size[0]
+        @bubble_chart.height = main_window.content_size[1]
+      end
+    }
+  }
+end
+
+BasicBubbleChart.launch
+```
+
+![basic bubble chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bubble-chart.png)
+
 
 Contributing to glimmer-libui-cc-graphs_and_charts
 ------------------------------------------

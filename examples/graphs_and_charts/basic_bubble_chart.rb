@@ -8,11 +8,11 @@ class BasicBubbleChart
   include Glimmer::LibUI::Application
   
   body {
-    window('Basic Line Graph', 900, 300) { |main_window|
+    window('Basic Bubble Chart', 900, 300) { |main_window|
       @bubble_chart = bubble_chart(
         width: 900,
         height: 300,
-        chart_color_bubble: [255, 107, 80],
+        chart_color_bubble: [239, 9, 9],
         values: {
           Time.new(2030, 12, 1, 13, 0, 0) => {
             1 => 4,
@@ -23,7 +23,7 @@ class BasicBubbleChart
           Time.new(2030, 12, 1, 13, 0, 2) => {
             1 => 1,
             2 => 5,
-            7 => 1,
+            7 => 2,
             10 => 0
           },
           Time.new(2030, 12, 1, 13, 0, 4) => {
@@ -34,8 +34,8 @@ class BasicBubbleChart
           },
           Time.new(2030, 12, 1, 13, 0, 6) => {
             1 => 7,
-            2 => 1,
-            7 => 7,
+            2 => 2,
+            7 => 5,
             10 => 0
           },
           Time.new(2030, 12, 1, 13, 0, 8) => {
@@ -46,7 +46,7 @@ class BasicBubbleChart
           },
           Time.new(2030, 12, 1, 13, 0, 10) => {
             1 => 1,
-            2 => 1,
+            2 => 2,
             3 => 9,
             10 => 0
           },

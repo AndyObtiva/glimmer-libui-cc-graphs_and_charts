@@ -18,7 +18,7 @@ Juwelier::Tasks.new do |gem|
   gem.homepage = "http://github.com/AndyObtiva/glimmer-libui-cc-graphs_and_charts"
   gem.license = "MIT"
   gem.summary = %Q{Graphs and Charts (Glimmer DSL for LibUI Custom Controls)}
-  gem.description = %Q{Graphs and Charts (Custom Controls for Glimmer DSL for LibUI), like Line Graph and Bar Chart.}
+  gem.description = %Q{Graphs and Charts (Glimmer DSL for LibUI Custom Controls), like Line Graph, Bar Chart, and Bubble Chart.}
   gem.email = "andy.am@gmail.com"
   gem.authors = ["Andy Maleh"]
 

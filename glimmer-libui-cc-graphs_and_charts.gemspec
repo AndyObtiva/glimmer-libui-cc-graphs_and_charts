@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib".freeze]
   s.authors = ["Andy Maleh".freeze]
   s.date = "2024-02-17"
-  s.description = "Graphs and Charts (Custom Controls for Glimmer DSL for LibUI), like Line Graph and Bar Chart.".freeze
+  s.description = "Graphs and Charts (Glimmer DSL for LibUI Custom Controls), like Line Graph, Bar Chart, and Bubble Chart.".freeze
   s.email = "andy.am@gmail.com".freeze
   s.extra_rdoc_files = [
     "CHANGELOG.md",
