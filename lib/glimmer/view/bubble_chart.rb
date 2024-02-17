@@ -3,7 +3,7 @@ require 'glimmer-dsl-libui'
 module Glimmer
   module View
     # General-Purpose Line Graph Custom Control
-    class LineGraph
+    class BubbleChart
       class << self
         def interpret_color(color_object)
           @color_cache ||= {}
@@ -13,80 +13,69 @@ module Glimmer
     
       include Glimmer::LibUI::CustomControl
       
-      DEFAULT_GRAPH_PADDING_WIDTH = 5.0
-      DEFAULT_GRAPH_PADDING_HEIGHT = 5.0
-      DEFAULT_GRAPH_GRID_MARKER_PADDING_WIDTH = 37.0
-      DEFAULT_GRAPH_POINT_DISTANCE = 15.0
-      DEFAULT_GRAPH_POINT_RADIUS = 1.0
-      DEFAULT_GRAPH_SELECTED_POINT_RADIUS = 3.0
+      DEFAULT_CHART_PADDING_WIDTH = 5.0
+      DEFAULT_CHART_PADDING_HEIGHT = 5.0
+      DEFAULT_CHART_GRID_MARKER_PADDING_WIDTH = 37.0
+      DEFAULT_CHART_POINT_DISTANCE = 15.0
+      DEFAULT_CHART_POINT_RADIUS = 1.0
+      DEFAULT_CHART_SELECTED_POINT_RADIUS = 3.0
       
-      DEFAULT_GRAPH_STROKE_GRID = [185, 184, 185]
-      DEFAULT_GRAPH_STROKE_MARKER = [185, 184, 185]
-      DEFAULT_GRAPH_STROKE_MARKER_LINE = [217, 217, 217, thickness: 1, dashes: [1, 1]]
-      DEFAULT_GRAPH_STROKE_PERIODIC_LINE = [121, 121, 121, thickness: 1, dashes: [1, 1]]
-      DEFAULT_GRAPH_STROKE_HOVER_LINE = [133, 133, 133]
+      DEFAULT_CHART_STROKE_GRID = [185, 184, 185]
+      DEFAULT_CHART_STROKE_MARKER = [185, 184, 185]
+      DEFAULT_CHART_STROKE_MARKER_LINE = [217, 217, 217, thickness: 1, dashes: [1, 1]]
+      DEFAULT_CHART_STROKE_PERIODIC_LINE = [121, 121, 121, thickness: 1, dashes: [1, 1]]
+      DEFAULT_CHART_STROKE_HOVER_LINE = [133, 133, 133]
       
-      DEFAULT_GRAPH_FILL_SELECTED_POINT = :white
+      DEFAULT_CHART_FILL_SELECTED_POINT = :white
       
-      DEFAULT_GRAPH_COLOR_MARKER_TEXT = [96, 96, 96]
-      DEFAULT_GRAPH_COLOR_PERIOD_TEXT = [163, 40, 39]
+      DEFAULT_CHART_COLOR_MARKER_TEXT = [96, 96, 96]
+      DEFAULT_CHART_COLOR_PERIOD_TEXT = [163, 40, 39]
       
-      DEFAULT_GRAPH_FONT_MARKER_TEXT = {family: "Arial", size: 14}
+      DEFAULT_CHART_FONT_MARKER_TEXT = {family: "Arial", size: 14}
       
-      DEFAULT_GRAPH_STATUS_HEIGHT = 30.0
+      DEFAULT_CHART_STATUS_HEIGHT = 30.0
       
       DAY_IN_SECONDS = 60*60*24
   
       option :width, default: 600
       option :height, default: 200
       
-      # Hash or Array of Hash's like:
-      # {
-      #   name: 'Attribute Name',
-      #   stroke: [28, 34, 89, thickness: 3],
-      #   x_value_start: Time.now,
-      #   x_interval_in_seconds: 2,
-      #   x_value_format: ->(time) {time.strftime('%s')},
-      #   y_values: [...]
-      # }
-      option :lines, default: []
+      option :lines, default: [] # TODO remove this once conversion of code to bubble chart is complete
+      option :values, default: []
       
-      option :graph_padding_width, default: DEFAULT_GRAPH_PADDING_WIDTH
-      option :graph_padding_height, default: DEFAULT_GRAPH_PADDING_HEIGHT
-      option :graph_grid_marker_padding_width, default: DEFAULT_GRAPH_GRID_MARKER_PADDING_WIDTH
-      option :graph_point_distance, default: DEFAULT_GRAPH_POINT_DISTANCE
-      option :graph_point_radius, default: DEFAULT_GRAPH_POINT_RADIUS
-      option :graph_selected_point_radius, default: DEFAULT_GRAPH_SELECTED_POINT_RADIUS
+      option :graph_padding_width, default: DEFAULT_CHART_PADDING_WIDTH
+      option :graph_padding_height, default: DEFAULT_CHART_PADDING_HEIGHT
+      option :graph_grid_marker_padding_width, default: DEFAULT_CHART_GRID_MARKER_PADDING_WIDTH
+      option :graph_point_distance, default: DEFAULT_CHART_POINT_DISTANCE
+      option :graph_point_radius, default: DEFAULT_CHART_POINT_RADIUS
+      option :graph_selected_point_radius, default: DEFAULT_CHART_SELECTED_POINT_RADIUS
       
-      option :graph_stroke_grid, default: DEFAULT_GRAPH_STROKE_GRID
-      option :graph_stroke_marker, default: DEFAULT_GRAPH_STROKE_MARKER
-      option :graph_stroke_marker_line, default: DEFAULT_GRAPH_STROKE_MARKER_LINE
-      option :graph_stroke_periodic_line, default: DEFAULT_GRAPH_STROKE_PERIODIC_LINE
-      option :graph_stroke_hover_line, default: DEFAULT_GRAPH_STROKE_HOVER_LINE
+      option :graph_stroke_grid, default: DEFAULT_CHART_STROKE_GRID
+      option :graph_stroke_marker, default: DEFAULT_CHART_STROKE_MARKER
+      option :graph_stroke_marker_line, default: DEFAULT_CHART_STROKE_MARKER_LINE
+      option :graph_stroke_periodic_line, default: DEFAULT_CHART_STROKE_PERIODIC_LINE
+      option :graph_stroke_hover_line, default: DEFAULT_CHART_STROKE_HOVER_LINE
       
-      option :graph_fill_selected_point, default: DEFAULT_GRAPH_FILL_SELECTED_POINT
+      option :graph_fill_selected_point, default: DEFAULT_CHART_FILL_SELECTED_POINT
       
-      option :graph_color_marker_text, default: DEFAULT_GRAPH_COLOR_MARKER_TEXT
-      option :graph_color_period_text, default: DEFAULT_GRAPH_COLOR_PERIOD_TEXT
+      option :graph_color_marker_text, default: DEFAULT_CHART_COLOR_MARKER_TEXT
+      option :graph_color_period_text, default: DEFAULT_CHART_COLOR_PERIOD_TEXT
       
-      option :graph_font_marker_text, default: DEFAULT_GRAPH_FONT_MARKER_TEXT
+      option :graph_font_marker_text, default: DEFAULT_CHART_FONT_MARKER_TEXT
       
-      option :graph_status_height, default: DEFAULT_GRAPH_STATUS_HEIGHT
+      option :graph_status_height, default: DEFAULT_CHART_STATUS_HEIGHT
       
       option :display_attributes_on_hover, default: false
       
       before_body do
-        self.lines = [lines] if lines.is_a?(Hash)
+        normalize_values
       end
       
       after_body do
-        observe(self, :lines) do
-          if lines.is_a?(Hash)
-            self.lines = [lines]
-          else
-            clear_drawing_cache
-            body_root.queue_redraw_all
-          end
+        observe(self, :values) do
+          normalize_values
+          clear_drawing_cache
+          body_root.queue_redraw_all
         end
         observe(self, :width) do
           clear_drawing_cache
@@ -102,7 +91,7 @@ module Glimmer
             calculate_dynamic_options
             graph_background
             grid_lines
-            all_line_graphs
+            all_bubble_charts
             periodic_lines
             hover_stats
           end
@@ -131,6 +120,30 @@ module Glimmer
       }
       
       private
+      
+      def normalize_values
+        normalized_values = []
+        values.each do |x_value, y_z_hash|
+          y_z_hash.each do |y_value, z_value|
+            normalized_values << {x_value: x_value, y_value: y_value, z_value: z_value}
+          end
+        end
+        normalized_lines_values = []
+        normalized_values.each do |normalized_value|
+          normalized_line_values = normalized_lines_values.detect do |line|
+            !line.include?(normalized_value[:x_value])
+          end
+          if normalized_line_values.nil?
+            normalized_line_values = {}
+            normalized_lines_values << normalized_line_values
+          end
+          normalized_line_values[normalized_value[:x_value]] = normalized_value[:y_value]
+        end
+        self.lines = normalized_lines_values.map do |normalized_line_values|
+          # TODO take name and stroke from component options/constants
+          {name: 'Bubble Chart', stroke: [163, 40, 39, thickness: 2], values: normalized_line_values}
+        end
+      end
       
       def clear_drawing_cache
         @graph_point_distance_per_line = nil
@@ -202,7 +215,7 @@ module Glimmer
           # TODO consider not caching the following line as that might save memory and run faster without caching
           @grid_marker_numbers[index] ||= (grid_marker_number_value >= 1000) ? "#{grid_marker_number_value / 1000}K" : grid_marker_number_value.to_s
           grid_marker_number = @grid_marker_numbers[index]
-          @graph_stroke_marker_values[index] ||= LineGraph.interpret_color(graph_stroke_marker).tap do |color_hash|
+          @graph_stroke_marker_values[index] ||= BubbleChart.interpret_color(graph_stroke_marker).tap do |color_hash|
             color_hash[:thickness] = (index != grid_marker_points.size - 1 ? 2 : 1) if color_hash[:thickness].nil?
           end
           graph_stroke_marker_value = @graph_stroke_marker_values[index]
@@ -274,25 +287,17 @@ module Glimmer
         [(0.15*height).to_i, 1].max
       end
       
-      def all_line_graphs
-        lines.each { |graph_line| single_line_graph(graph_line) }
+      def all_bubble_charts
+        lines.each { |graph_line| single_bubble_chart(graph_line) }
       end
 
-      def single_line_graph(graph_line)
-        last_point = nil
+      def single_bubble_chart(graph_line)
         points = calculate_points(graph_line)
         points.to_a.each do |point|
-          if last_point
-            line(last_point[:x], last_point[:y], point[:x], point[:y]) {
-              stroke graph_line[:stroke]
-            }
-          end
-          if last_point.nil? || graph_point_radius > 1
-            circle(point[:x], point[:y], graph_point_radius) {
-              fill graph_line[:stroke]
-            }
-          end
-          last_point = point
+#           circle(point[:x], point[:y], graph_point_radius) {
+          circle(point[:x], point[:y], point[:z]) {
+            fill graph_line[:stroke]
+          }
         end
       end
       
@@ -322,18 +327,20 @@ module Glimmer
       
       def calculate_points_absolute(graph_line)
         @points ||= {}
+        # and then use them to produce a :z key in the hash below
         if @points[graph_line].nil?
           values = graph_line[:values] || []
           # all points are visible when :values is supplied because we stretch the graph to show them all
           graph_y_max = [y_value_max_for_all_lines, 1].max
           x_value_range_for_all_lines
           points = values.each_with_index.map do |(x_value, y_value), index|
+            z_value = self.values[x_value][y_value]
             relative_x_value = x_value - x_value_min_for_all_lines
             scaled_x_value = x_value_range_for_all_lines == 0 ? 0 : relative_x_value.to_f * x_resolution.to_f
             scaled_y_value = y_value_max_for_all_lines == 0 ? 0 : y_value.to_f * y_resolution.to_f
             x = width - graph_padding_width - scaled_x_value
             y = height - graph_padding_height - scaled_y_value
-            {x: x, y: y, index: index, x_value: x_value, y_value: y_value}
+            {x: x, y: y, z: z_value, index: index, x_value: x_value, y_value: y_value}
           end
           # Translation is not supported today
           # TODO consider supporting in the future
@@ -489,7 +496,7 @@ module Glimmer
             }
           end
           text_label = formatted_x_value(@closest_point_index)
-          text_label_width = estimate_width_of_text(text_label, DEFAULT_GRAPH_FONT_MARKER_TEXT)
+          text_label_width = estimate_width_of_text(text_label, DEFAULT_CHART_FONT_MARKER_TEXT)
           lines_with_closest_points = lines.each_with_index.map do |line, index|
             next if closest_points[index].nil?
             
@@ -508,7 +515,7 @@ module Glimmer
 
           text(text_label_x, text_label_y, text_label_width) {
             string(text_label) {
-              font DEFAULT_GRAPH_FONT_MARKER_TEXT
+              font DEFAULT_CHART_FONT_MARKER_TEXT
               color graph_color_marker_text
             }
           }

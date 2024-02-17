@@ -7,6 +7,7 @@
 - Display the axis labels of the x-axis and y-axis in `line_graph`
 - Display tooltips on hover in `line_graph`
 - Display tooltips on hover in `bar_chart`
+- Set default `line_graph` `:stroke` when not specified
 - Rename lines to series (spawning a new minor version)
 - Reverse the order of y_values data (spawning a new minor version)
 - Support more smart defaults to enable rendering a `line_graph` with the least amount of options possible (like not specifying any `x_value` options at all).

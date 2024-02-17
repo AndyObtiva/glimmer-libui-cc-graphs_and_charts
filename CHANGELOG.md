@@ -2,7 +2,9 @@
 
 ## 0.3.0
 
+- Initial implementation of `bubble_chart` custom control
 - New `examples/graphs_and_charts/basic_bubble_chart.rb`
+- Ensure that dynamically setting `lines` option in `line_graph` normalizes `lines` into `Array` if value is a `Hash`
 
 ## 0.2.3
 
