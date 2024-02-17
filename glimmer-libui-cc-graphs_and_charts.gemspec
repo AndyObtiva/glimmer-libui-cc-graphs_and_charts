@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
   s.authors = ["Andy Maleh".freeze]
-  s.date = "2024-01-14"
+  s.date = "2024-02-17"
   s.description = "Graphs and Charts (Custom Controls for Glimmer DSL for LibUI), like Line Graph and Bar Chart.".freeze
   s.email = "andy.am@gmail.com".freeze
   s.extra_rdoc_files = [
@@ -25,11 +25,13 @@ Gem::Specification.new do |s|
     "README.md",
     "VERSION",
     "examples/graphs_and_charts/basic_bar_chart.rb",
+    "examples/graphs_and_charts/basic_bubble_chart.rb",
     "examples/graphs_and_charts/basic_line_graph.rb",
     "examples/graphs_and_charts/basic_line_graph_relative.rb",
     "glimmer-libui-cc-graphs_and_charts.gemspec",
     "lib/glimmer-libui-cc-graphs_and_charts.rb",
     "lib/glimmer/view/bar_chart.rb",
+    "lib/glimmer/view/bubble_chart.rb",
     "lib/glimmer/view/line_graph.rb"
   ]
   s.homepage = "http://github.com/AndyObtiva/glimmer-libui-cc-graphs_and_charts".freeze

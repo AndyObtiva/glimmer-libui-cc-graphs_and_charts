@@ -12,7 +12,7 @@ class BasicBubbleChart
       @bubble_chart = bubble_chart(
         width: 900,
         height: 300,
-        fill: [163, 40, 39],
+        chart_color_bubble: [255, 107, 80],
         values: {
           Time.new(2030, 12, 1, 13, 0, 0) => {
             1 => 4,
