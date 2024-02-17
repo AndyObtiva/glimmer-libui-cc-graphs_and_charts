@@ -1,5 +1,6 @@
 # TODO
 
+- Fix an issue in `bubble_chart` rendering x-axis values backwards
 - Initial implementation of `bar_chart` custom control
 - Highlight display information for `bar_chart` x-axis point's data for y-axis and z-axis (+ supporting labels for them)
 - Support non-Integer values for `line_graph` in relative mode
