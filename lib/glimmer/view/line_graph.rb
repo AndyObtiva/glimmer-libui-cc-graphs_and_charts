@@ -74,6 +74,7 @@ module Glimmer
       option :graph_status_height, default: DEFAULT_GRAPH_STATUS_HEIGHT
       
       option :display_attributes_on_hover, default: false
+      option :reverse_x, default: false
       
       before_body do
         self.lines = [lines] if lines.is_a?(Hash)
@@ -112,8 +113,13 @@ module Glimmer
         
             if @hover_point && lines && lines[0] && @points && @points[lines[0]] && !@points[lines[0]].empty?
               x = @hover_point[:x]
-              closest_point_index = ((width - graph_padding_width - x) / graph_point_distance_for_line(lines[0])).round
-              if closest_point_index != @closest_point_index
+              if lines[0][:x_interval_in_seconds]
+                closest_point_index = ((width - graph_padding_width - x) / graph_point_distance_for_line(lines[0])).round
+              else
+                closest_point_index = :absolute
+              end
+              if closest_point_index == :absolute || closest_point_index != @closest_point_index
+                # TODO look into optimizing this for absolute mode
                 @closest_point_index = closest_point_index
                 graph_area.queue_redraw_all
               end
@@ -275,12 +281,14 @@ module Glimmer
       end
       
       def all_line_graphs
-        lines.each { |graph_line| single_line_graph(graph_line) }
+        lines.each(&method(:single_line_graph))
       end
 
       def single_line_graph(graph_line)
         last_point = nil
         points = calculate_points(graph_line)
+        # points are already calculated as reversed before here, so here we reverse again if needed
+        points = reverse_x_in_points(points) if !reverse_x
         points.to_a.each do |point|
           if last_point
             line(last_point[:x], last_point[:y], point[:x], point[:y]) {
@@ -341,6 +349,22 @@ module Glimmer
           @points[graph_line] = points
         end
         @points[graph_line]
+      end
+      
+      def reverse_x_in_points(points)
+        # TODO look into optimizing operations below by not iterating 3 times (perhaps one iteration could do everything)
+        points = points.map do |point|
+          point.merge(x: width_drawable.to_f - point[:x])
+        end
+        min_point = points.min_by {|point| point[:x]}
+        if min_point[:x] < 0
+          points.each do |point|
+            point[:x] = point[:x] - min_point[:x]
+          end
+        end
+        points.each do |point|
+          point[:x] = point[:x] + graph_padding_width.to_f
+        end
       end
       
       # this is the multiplier that we must multiply by the relative x value
@@ -472,7 +496,19 @@ module Glimmer
         
         if @hover_point && lines && lines[0] && @points && @points[lines[0]] && !@points[lines[0]].empty?
           x = @hover_point[:x]
-          closest_points = lines.map { |line| @points[line][@closest_point_index] }
+          if @closest_point_index == :absolute # used in absolute mode
+            # TODO this is making a wrong assumption that there will be a point for every line
+            # some lines might end up with no points, so we need to filter them out
+            # we should start with the point across all lines that is closest to the mouse hover point
+            # and then pick up points that match its X value
+            closest_points = lines.map do |line|
+              line_points = @points[line]
+              point_distances_from_hover_point = line_points.map { |point| [point, PerfectShape::Point.point_distance(point[:x], point[:y], @hover_point[:x], @hover_point[:y])] }
+              closest_point = point_distances_from_hover_point.min_by(&:last).first
+            end
+          else
+            closest_points = lines.map { |line| @points[line][@closest_point_index] }
+          end
           closest_x = closest_points[0]&.[](:x)
           line(closest_x, graph_padding_height, closest_x, height - graph_padding_height) {
             stroke graph_stroke_hover_line
@@ -488,14 +524,21 @@ module Glimmer
               stroke stroke_value
             }
           end
-          text_label = formatted_x_value(@closest_point_index)
+          text_label = formatted_x_value(@closest_point_index, closest_points)
           text_label_width = estimate_width_of_text(text_label, DEFAULT_GRAPH_FONT_MARKER_TEXT)
           lines_with_closest_points = lines.each_with_index.map do |line, index|
             next if closest_points[index].nil?
             
             line
           end.compact
-          closest_point_texts = lines_with_closest_points.map { |line| "#{line[:name]}: #{line[:y_values][@closest_point_index]}" }
+          closest_point_texts = lines_with_closest_points.each_with_index.map do |line, index|
+            if @closest_point_index == :absolute
+              line_point = closest_points[index]
+              "#{line[:name]}: #{line_point[:y_value]}"
+            else
+              "#{line[:name]}: #{line[:y_values][@closest_point_index]}"
+            end
+          end
           closest_point_text_widths = closest_point_texts.map do |text|
             estimate_width_of_text(text, graph_font_marker_text)
           end
@@ -536,12 +579,10 @@ module Glimmer
         end
       end
       
-      def formatted_x_value(x_value_index)
-        # Today, we make the assumption that all lines have points along the same x-axis values
-        # TODO In the future, we can support different x values along different lines
+      def formatted_x_value(x_value_index, closest_points)
         graph_line = lines[0]
         x_value_format = graph_line[:x_value_format] || :to_s
-        x_value = calculated_x_value(x_value_index)
+        x_value = calculated_x_value(x_value_index, closest_points)
         if (x_value_format.is_a?(Symbol) || x_value_format.is_a?(String))
           x_value.send(x_value_format)
         else
@@ -549,11 +590,13 @@ module Glimmer
         end
       end
       
-      def calculated_x_value(x_value_index)
-        # Today, we make the assumption that all lines have points along the same x-axis values
-        # TODO In the future, we can support different x values along different lines
-        graph_line = lines[0]
-        graph_line[:x_value_start] - (graph_line[:x_interval_in_seconds] * x_value_index)
+      def calculated_x_value(x_value_index, closest_points = nil)
+        if x_value_index == :absolute # absolute mode
+          closest_points.first[:x_value]
+        else # relative mode
+          graph_line = lines[0]
+          graph_line[:x_value_start] - (graph_line[:x_interval_in_seconds] * x_value_index)
+        end
       end
       
       def estimate_width_of_text(text_string, font_properties)

@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.4.0
+
+- Support `reverse_x` option; when `false`, line graphs are drawn naturally from left to right, and when `true`, line graphs are drawn like before from right to left.
+- Rename previous line graph examples to indicate that they have reverse_x as `true`
+- Add new `examples/graphs_and_charts/basic_line_graph.rb` example that renders line graphs naturally from left to right.
+
 ## 0.3.0
 
 - Initial implementation of `bubble_chart` custom control

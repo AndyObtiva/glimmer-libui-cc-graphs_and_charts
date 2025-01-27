@@ -1,4 +1,4 @@
-# Graphs and Charts 0.3.0 (Alpha)
+# Graphs and Charts 0.4.0 (Alpha)
 ## [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui) Custom Controls
 [![Gem Version](https://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts.svg)](http://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts)
 [![Join the chat at https://gitter.im/AndyObtiva/glimmer](https://badges.gitter.im/AndyObtiva/glimmer.svg)](https://gitter.im/AndyObtiva/glimmer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -7,7 +7,7 @@ Graphs and Charts (Custom Controls for [Glimmer DSL for LibUI](https://github.co
 
 ![bar chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bar-chart.png)
 
-![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
+![line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
 
 ![bubble chart](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-bubble-chart.png)
 
@@ -16,7 +16,7 @@ Graphs and Charts (Custom Controls for [Glimmer DSL for LibUI](https://github.co
 Add this line to Bundler `Gemfile`:
 
 ```ruby
-gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.3.0'
+gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.4.0'
 ```
 
 Run:
@@ -176,12 +176,53 @@ line_graph(
 
 ![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
 
-**Relative Mode:**
+**Absolute Mode (reverse x):**
+
+It supports any `Numeric` y-axis values in addition to `Time` x-axis values.
+
+```ruby
+line_graph(
+  reverse_x: true,
+  width: 900,
+  height: 300,
+  lines: [
+    {
+      name: 'Stock 1',
+      stroke: [163, 40, 39, thickness: 2],
+      values: {
+        Time.new(2030, 12, 1) => 80,
+        Time.new(2030, 12, 2) => 36,
+        Time.new(2030, 12, 4) => 10,
+        Time.new(2030, 12, 5) => 60,
+        Time.new(2030, 12, 6) => 20,
+      },
+      x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+    },
+    {
+      name: 'Stock 2',
+      stroke: [47, 109, 104, thickness: 2],
+      values: {
+        Time.new(2030, 12, 1) => 62,
+        Time.new(2030, 12, 2) => 0,
+        Time.new(2030, 12, 3) => 90,
+        Time.new(2030, 12, 5) => 0,
+        Time.new(2030, 12, 7) => 17,
+      },
+      x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+    },
+  ],
+)
+```
+
+![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-reverse-x.png)
+
+**Relative Mode (reverse x):**
 
 Currently, it only supports `Integer` y-axis values in addition to `Time` x-axis values.
 
 ```ruby
 line_graph(
+  reverse_x: true,
   width: 900,
   height: 300,
   graph_point_distance: :width_divided_by_point_count,
@@ -207,7 +248,7 @@ line_graph(
 )
 ```
 
-![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
+![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative-reverse-x.png)
 
 Look into [lib/glimmer/view/line_graph.rb](/lib/glimmer/view/line_graph.rb) to learn about all supported options.
 
@@ -266,7 +307,7 @@ end
 BasicLineGraph.launch
 ```
 
-![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph.png)
+![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-reverse-x.png)
 
 **Basic Line Graph Relative Example:**
 
@@ -314,7 +355,7 @@ end
 BasicLineGraphRelative.launch
 ```
 
-![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
+![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative-reverse-x.png)
 
 ### Bubble Chart
 
