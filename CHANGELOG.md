@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.4.1
+
+- Support `reverse_x` as `false` when rendering a line graph in relative mode (without `display_attributes_on_hover: true` for now).
+- Add new `examples/graphs_and_charts/basic_line_graph_relative.rb` example that renders line graphs naturally from left to right (with reverse_x not specified, meaning having value `false`).
+
 ## 0.4.0
 
 - Support `reverse_x` option; when `false`, line graphs are drawn naturally from left to right, and when `true`, line graphs are drawn like before from right to left.

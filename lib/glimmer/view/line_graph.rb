@@ -357,9 +357,10 @@ module Glimmer
           point.merge(x: width_drawable.to_f - point[:x])
         end
         min_point = points.min_by {|point| point[:x]}
-        if min_point[:x] < 0
+        min_point_x = min_point[:x]
+        if min_point_x < 0
           points.each do |point|
-            point[:x] = point[:x] - min_point[:x]
+            point[:x] = point[:x] - min_point_x
           end
         end
         points.each do |point|

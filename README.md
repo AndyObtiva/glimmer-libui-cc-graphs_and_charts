@@ -1,4 +1,4 @@
-# Graphs and Charts 0.4.0 (Alpha)
+# Graphs and Charts 0.4.1 (Alpha)
 ## [Glimmer DSL for LibUI](https://github.com/AndyObtiva/glimmer-dsl-libui) Custom Controls
 [![Gem Version](https://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts.svg)](http://badge.fury.io/rb/glimmer-libui-cc-graphs_and_charts)
 [![Join the chat at https://gitter.im/AndyObtiva/glimmer](https://badges.gitter.im/AndyObtiva/glimmer.svg)](https://gitter.im/AndyObtiva/glimmer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -16,7 +16,7 @@ Graphs and Charts (Custom Controls for [Glimmer DSL for LibUI](https://github.co
 Add this line to Bundler `Gemfile`:
 
 ```ruby
-gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.4.0'
+gem 'glimmer-libui-cc-graphs_and_charts', '~> 0.4.1'
 ```
 
 Run:
@@ -137,6 +137,8 @@ Note that you can use in absolute mode or relative mode for determining x-axis v
 - Absolute Mode: pass `values` which maps x-axis values to y-axis values
 - Relative Mode: pass `y_values`, `x_value_start`, and `x_interval_in_seconds` (x-axis values are calculated automatically in a uniform way from `x_value_start` deducting `x_interval_in_seconds`)
 
+Look into [lib/glimmer/view/line_graph.rb](/lib/glimmer/view/line_graph.rb) to learn about all supported options.
+
 **Absolute Mode:**
 
 It supports any `Numeric` y-axis values in addition to `Time` x-axis values.
@@ -216,6 +218,38 @@ line_graph(
 
 ![basic line graph](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-reverse-x.png)
 
+**Relative Mode:**
+
+Currently, it only supports `Integer` y-axis values in addition to `Time` x-axis values.
+
+```ruby
+line_graph(
+  width: 900,
+  height: 300,
+  graph_point_distance: :width_divided_by_point_count,
+  lines: [
+    {
+      name: 'Feature A',
+      stroke: [163, 40, 39, thickness: 2],
+      x_value_start: @start_time,
+      x_interval_in_seconds: 8,
+      x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+      y_values: [80, 36, 10, 60, 20, 110, 16, 5, 36, 1, 77, 15, 3, 34, 8, 63, 12, 17, 90, 28, 70]
+    },
+    {
+      name: 'Feature B',
+      stroke: [47, 109, 104, thickness: 2],
+      x_value_start: @start_time,
+      x_interval_in_seconds: 8,
+      x_value_format: -> (time) {time.strftime("%a %d %b %Y %T GMT")},
+      y_values: [62, 0, 90, 0, 0, 27, 0, 56, 0, 0, 24, 0, 60, 0, 30, 0, 47, 0, 38, 90, 0]
+    },
+  ],
+)
+```
+
+![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative.png)
+
 **Relative Mode (reverse x):**
 
 Currently, it only supports `Integer` y-axis values in addition to `Time` x-axis values.
@@ -249,8 +283,6 @@ line_graph(
 ```
 
 ![basic line graph relative](/screenshots/glimmer-libui-cc-graphs_and_charts-mac-basic-line-graph-relative-reverse-x.png)
-
-Look into [lib/glimmer/view/line_graph.rb](/lib/glimmer/view/line_graph.rb) to learn about all supported options.
 
 **Basic Line Graph Example:**
 
