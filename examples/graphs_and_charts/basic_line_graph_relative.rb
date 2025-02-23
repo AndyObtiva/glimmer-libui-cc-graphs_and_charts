@@ -35,6 +35,7 @@ class BasicLineGraphRelative
             y_values: [62, 0, 90, 0, 0, 27, 0, 56, 0, 0, 24, 0, 60, 0, 30, 0, 47, 0, 38, 90, 0]
           },
         ],
+        display_attributes_on_hover: true,
       )
       
       on_content_size_changed do

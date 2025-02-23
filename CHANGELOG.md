@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.4.2
+
+- Line Graph relative mode with `reverse_x` as `false` adds x_interval_in_seconds time positively.
+- examples/graphs_and_charts/basic_line_graph_relative.rb demonstrates Line Graph in relative mode with `reverse_x` as `false`
+
 ## 0.4.1
 
 - Support `reverse_x` as `false` when rendering a line graph in relative mode (without `display_attributes_on_hover: true` for now).

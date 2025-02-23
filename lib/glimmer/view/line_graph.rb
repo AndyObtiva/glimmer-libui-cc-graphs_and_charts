@@ -352,6 +352,7 @@ module Glimmer
       end
       
       def reverse_x_in_points(points)
+        # TODO consider caching results based on points
         # TODO look into optimizing operations below by not iterating 3 times (perhaps one iteration could do everything)
         points = points.map do |point|
           point.merge(x: width_drawable.to_f - point[:x])
@@ -508,7 +509,15 @@ module Glimmer
               closest_point = point_distances_from_hover_point.min_by(&:last).first
             end
           else
-            closest_points = lines.map { |line| @points[line][@closest_point_index] }
+            closest_points = lines.map { |line|
+              line_points = @points[line]
+              if !reverse_x
+                line_points = reverse_x_in_points(line_points)
+                line_points[line_points.size - @closest_point_index]
+              else
+                line_points[@closest_point_index]
+              end
+            }
           end
           closest_x = closest_points[0]&.[](:x)
           line(closest_x, graph_padding_height, closest_x, height - graph_padding_height) {
@@ -525,7 +534,11 @@ module Glimmer
               stroke stroke_value
             }
           end
-          text_label = formatted_x_value(@closest_point_index, closest_points)
+          if !reverse_x
+            text_label = formatted_x_value(@closest_point_index, closest_points)
+          else
+            text_label = formatted_x_value(@closest_point_index, closest_points)
+          end
           text_label_width = estimate_width_of_text(text_label, DEFAULT_GRAPH_FONT_MARKER_TEXT)
           lines_with_closest_points = lines.each_with_index.map do |line, index|
             next if closest_points[index].nil?
@@ -537,7 +550,11 @@ module Glimmer
               line_point = closest_points[index]
               "#{line[:name]}: #{line_point[:y_value]}"
             else
-              "#{line[:name]}: #{line[:y_values][@closest_point_index]}"
+              if !reverse_x
+                "#{line[:name]}: #{line[:y_values][closest_points.size - 2 - @closest_point_index]}"
+              else
+                "#{line[:name]}: #{line[:y_values][@closest_point_index]}"
+              end
             end
           end
           closest_point_text_widths = closest_point_texts.map do |text|
